@@ -15,6 +15,8 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 import websockets
 from websockets.asyncio.server import serve
+from websockets.http11 import Response
+from websockets.datastructures import Headers
 
 load_dotenv()
 
@@ -28,6 +30,27 @@ logger = logging.getLogger("clutch.server")
 
 APP_NAME = "clutch"
 session_service = InMemorySessionService()
+
+# Path to the frontend HTML file
+HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "web-app", "index.html")
+
+
+def process_request(connection, request):
+    """Serve index.html for HTTP GET /; pass through WebSocket upgrades."""
+    if request.headers.get("Upgrade", "").lower() == "websocket":
+        return None  # let the WebSocket handshake proceed
+    if request.path == "/" or request.path == "/index.html":
+        try:
+            body = open(HTML_PATH, "rb").read()
+        except FileNotFoundError:
+            return Response(404, "Not Found", Headers(), b"index.html not found")
+        headers = Headers([
+            ("Content-Type", "text/html; charset=utf-8"),
+            ("Content-Length", str(len(body))),
+            ("Cache-Control", "no-cache"),
+        ])
+        return Response(200, "OK", headers, body)
+    return Response(404, "Not Found", Headers(), b"Not Found")
 
 
 async def handle_client(websocket):
@@ -50,7 +73,7 @@ async def handle_client(websocket):
     live_queue = LiveRequestQueue()
 
     run_config = RunConfig(
-        response_modalities=["AUDIO", "TEXT"],
+        response_modalities=[types.Modality.AUDIO],
     )
 
     # Task to consume events from the agent and forward to the client
@@ -64,7 +87,10 @@ async def handle_client(websocket):
             ):
                 msg = _event_to_message(event)
                 if msg:
-                    await websocket.send(json.dumps(msg))
+                    try:
+                        await websocket.send(json.dumps(msg, default=str))
+                    except TypeError:
+                        logger.warning("Skipping non-serializable event: %s", type(event))
         except Exception:
             logger.exception("Error in event stream")
 
@@ -104,11 +130,13 @@ async def handle_client(websocket):
                     )
                 )
 
-            elif msg_type == "activity_start":
-                live_queue.send_activity_start()
+            elif msg_type == "config":
+                # Language preference or other session config from frontend
+                logger.info("Config update: %s", data)
 
-            elif msg_type == "activity_end":
-                live_queue.send_activity_end()
+            elif msg_type in ("activity_start", "activity_end"):
+                # Ignored — Gemini Live API uses automatic voice activity detection
+                pass
 
             else:
                 logger.warning("Unknown message type: %s", msg_type)
@@ -143,18 +171,18 @@ def _event_to_message(event) -> dict | None:
                     "author": event.author or "clutch",
                 }
 
-    # Transcription events
+    # Transcription events (Transcription objects have .text and .finished)
     if event.input_transcription:
         return {
             "type": "input_transcription",
-            "text": event.input_transcription,
-            "partial": event.partial or False,
+            "text": event.input_transcription.text or "",
+            "partial": not event.input_transcription.finished,
         }
     if event.output_transcription:
         return {
             "type": "output_transcription",
-            "text": event.output_transcription,
-            "partial": event.partial or False,
+            "text": event.output_transcription.text or "",
+            "partial": not event.output_transcription.finished,
         }
 
     # Function call results (tool outputs with tutorial card data)
@@ -163,9 +191,13 @@ def _event_to_message(event) -> dict | None:
         results = []
         for resp in function_responses:
             if resp.response:
+                # resp.response may be a dict or a pydantic model
+                result = resp.response
+                if hasattr(result, "model_dump"):
+                    result = result.model_dump()
                 results.append({
                     "tool": resp.name,
-                    "result": resp.response,
+                    "result": result,
                 })
         if results:
             return {
@@ -190,7 +222,11 @@ async def main():
 
     logger.info("Clutch WebSocket server starting on ws://%s:%d", host, port)
 
-    async with serve(handle_client, host, port, max_size=10 * 1024 * 1024):
+    async with serve(
+        handle_client, host, port,
+        max_size=10 * 1024 * 1024,
+        process_request=process_request,
+    ):
         await asyncio.Future()  # run forever
 
 

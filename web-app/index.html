@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Clutch</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --header-bg: #1a1a2e;
+  --accent-green: #2ecc71;
+  --accent-red: #e74c3c;
+  --card-bg: #ffffff;
+  --body-bg: #f0f2f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --radius: 12px;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  background: var(--body-bg);
+  color: var(--text-primary);
+  -webkit-text-size-adjust: 100%;
+  overflow: hidden;
+}
+
+/* ---- HEADER ---- */
+header {
+  background: var(--header-bg);
+  color: #fff;
+  padding: 16px 20px 12px;
+  position: relative;
+  z-index: 10;
+}
+header .top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+header .tagline {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 2px;
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#lang-select {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#lang-select option { color: #000; }
+.settings-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+/* ---- SETTINGS MODAL ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 90%;
+  max-width: 360px;
+}
+.modal h2 { font-size: 18px; margin-bottom: 12px; }
+.modal label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+.modal input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-actions button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-cancel { background: #eee; color: #333; }
+.btn-save { background: var(--header-bg); color: #fff; }
+
+/* ---- MAIN CONTENT ---- */
+main {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 76px);
+  overflow: hidden;
+}
+
+/* ---- CAMERA PREVIEW ---- */
+.camera-container {
+  position: relative;
+  flex-shrink: 0;
+}
+#camera-preview {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #000;
+  display: none;
+}
+#camera-preview.active { display: block; }
+.camera-thumb {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: none;
+}
+.camera-thumb.active { display: block; }
+.camera-thumb canvas {
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Full camera (before session), thumbnail (during session) */
+#camera-preview.thumb-mode { display: none; }
+
+/* ---- LISTENING INDICATOR ---- */
+.listening-bar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--header-bg);
+  flex-shrink: 0;
+}
+.listening-bar.active { display: flex; }
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+.listening-bar span {
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---- TRANSCRIPT BAR ---- */
+.transcript-bar {
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-height: 0;
+  flex-shrink: 0;
+  display: none;
+}
+.transcript-bar.active { display: block; }
+.transcript-bar .label { font-weight: 600; color: var(--text-primary); }
+
+/* ---- TUTORIAL CARDS ---- */
+.cards-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px 120px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 12px;
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card .step-badge {
+  display: inline-block;
+  background: var(--header-bg);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+.card .instruction {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.card .tools-needed {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.card .tools-needed strong { color: var(--text-primary); }
+.card .card-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  max-height: 200px;
+  object-fit: cover;
+  background: #eee;
+}
+.card .yt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #e74c3c;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.card .yt-link .yt-icon {
+  width: 20px;
+  height: 14px;
+  background: #e74c3c;
+  border-radius: 3px;
+  position: relative;
+  display: inline-block;
+}
+.card .yt-link .yt-icon::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  border-left: 7px solid #fff;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+/* Agent text message card */
+.card.agent-msg {
+  background: #f7f8fa;
+  border-left: 3px solid var(--header-bg);
+}
+.card.agent-msg .instruction {
+  font-size: 15px;
+}
+
+/* Safety warning card */
+.card.safety-warning {
+  background: #fff3cd;
+  border-left: 3px solid #ff9800;
+}
+
+/* ---- CONTROLS ---- */
+.controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--body-bg) 20%);
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+#start-btn, #stop-btn {
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+#start-btn:active, #stop-btn:active { transform: scale(0.95); }
+#start-btn {
+  background: var(--accent-green);
+  color: #fff;
+}
+#stop-btn {
+  background: var(--accent-red);
+  color: #fff;
+  display: none;
+}
+
+/* ---- IMAGE LIGHTBOX ---- */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lightbox.open { display: flex; }
+.lightbox img {
+  max-width: 95%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+
+/* ---- EMPTY STATE ---- */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; line-height: 1.5; }
+
+/* ---- HIDDEN ELEMENTS ---- */
+canvas.hidden-canvas { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top-row">
+    <div>
+      <h1>&#128295; Clutch</h1>
+      <div class="tagline">The only tool in your box that tells you what to do next.</div>
+    </div>
+    <div class="header-controls">
+      <select id="lang-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Espa&#241;ol</option>
+        <option value="vi">Ti&#7871;ng Vi&#7879;t</option>
+        <option value="fr">Fran&#231;ais</option>
+      </select>
+      <button class="settings-btn" id="settings-btn" aria-label="Settings">&#9881;</button>
+    </div>
+  </div>
+</header>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <label for="ws-url-input">WebSocket URL</label>
+    <input type="text" id="ws-url-input" value="">
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-save" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lightbox" id="lightbox">
+  <img id="lightbox-img" src="" alt="Enlarged image">
+</div>
+
+<main>
+  <!-- Camera preview (full size before session, hidden during) -->
+  <div class="camera-container" id="camera-container">
+    <video id="camera-preview" autoplay playsinline muted></video>
+  </div>
+
+  <!-- Camera thumbnail during active session -->
+  <div class="camera-thumb" id="camera-thumb">
+    <canvas id="thumb-canvas" width="160" height="120"></canvas>
+  </div>
+
+  <!-- Listening indicator -->
+  <div class="listening-bar" id="listening-bar">
+    <div class="pulse-dot"></div>
+    <span>Listening...</span>
+  </div>
+
+  <!-- Live transcript -->
+  <div class="transcript-bar" id="transcript-bar">
+    <span class="label">You: </span><span id="transcript-text"></span>
+  </div>
+
+  <!-- Tutorial cards list -->
+  <div class="cards-area" id="cards-area">
+    <div class="empty-state" id="empty-state">
+      <div class="icon">&#128064;</div>
+      <p>Point your camera at whatever you need help with,<br>then tap <strong>Start Session</strong>.</p>
+    </div>
+  </div>
+</main>
+
+<!-- Controls -->
+<div class="controls">
+  <button id="start-btn">Start Session</button>
+  <button id="stop-btn">Stop Session</button>
+</div>
+
+<!-- Hidden canvas for frame capture -->
+<canvas class="hidden-canvas" id="capture-canvas"></canvas>
+
+<script>
+(function() {
+  "use strict";
+
+  // ---- State ----
+  let ws = null;
+  let mediaStream = null;
+  let audioContext = null;
+  let audioWorkletNode = null;
+  let frameInterval = null;
+  let sessionActive = false;
+  let playbackCtx = null;
+  let playbackQueue = [];
+  let isPlaying = false;
+
+  // ---- DOM refs ----
+  const startBtn = document.getElementById("start-btn");
+  const stopBtn = document.getElementById("stop-btn");
+  const cameraPreview = document.getElementById("camera-preview");
+  const cameraContainer = document.getElementById("camera-container");
+  const cameraThumb = document.getElementById("camera-thumb");
+  const thumbCanvas = document.getElementById("thumb-canvas");
+  const captureCanvas = document.getElementById("capture-canvas");
+  const cardsArea = document.getElementById("cards-area");
+  const emptyState = document.getElementById("empty-state");
+  const listeningBar = document.getElementById("listening-bar");
+  const transcriptBar = document.getElementById("transcript-bar");
+  const transcriptText = document.getElementById("transcript-text");
+  const langSelect = document.getElementById("lang-select");
+  const settingsBtn = document.getElementById("settings-btn");
+  const settingsModal = document.getElementById("settings-modal");
+  const wsUrlInput = document.getElementById("ws-url-input");
+  const modalCancel = document.getElementById("modal-cancel");
+  const modalSave = document.getElementById("modal-save");
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightbox-img");
+
+  // Derive default WS URL from the current page host
+  function getDefaultWsUrl() {
+    var proto = location.protocol === "https:" ? "wss:" : "ws:";
+    return proto + "//" + location.host;
+  }
+
+  // Load saved WS URL or use auto-detected default
+  var savedUrl = localStorage.getItem("clutch_ws_url");
+  wsUrlInput.value = savedUrl || getDefaultWsUrl();
+  wsUrlInput.placeholder = getDefaultWsUrl();
+
+  // ---- Settings Modal ----
+  settingsBtn.addEventListener("click", function() {
+    settingsModal.classList.add("open");
+  });
+  modalCancel.addEventListener("click", function() {
+    settingsModal.classList.remove("open");
+  });
+  modalSave.addEventListener("click", function() {
+    localStorage.setItem("clutch_ws_url", wsUrlInput.value.trim());
+    settingsModal.classList.remove("open");
+  });
+  settingsModal.addEventListener("click", function(e) {
+    if (e.target === settingsModal) settingsModal.classList.remove("open");
+  });
+
+  // ---- Lightbox ----
+  lightbox.addEventListener("click", function() {
+    lightbox.classList.remove("open");
+  });
+
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.classList.add("open");
+  }
+
+  // ---- Language selector ----
+  langSelect.addEventListener("change", function() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
+    }
+  });
+
+  // ---- Camera ----
+  async function startCamera() {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: {
+          sampleRate: 16000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
+      cameraPreview.srcObject = mediaStream;
+      cameraPreview.classList.add("active");
+    } catch (err) {
+      alert("Camera/microphone access is required. Please allow permissions and try again.");
+      throw err;
+    }
+  }
+
+  // ---- Frame Capture ----
+  function startFrameCapture() {
+    const ctx = captureCanvas.getContext("2d");
+    const thumbCtx = thumbCanvas.getContext("2d");
+
+    frameInterval = setInterval(function() {
+      if (!cameraPreview.videoWidth) return;
+
+      // Capture at reduced resolution for bandwidth
+      var w = 640;
+      var h = Math.round(cameraPreview.videoHeight * (640 / cameraPreview.videoWidth));
+      captureCanvas.width = w;
+      captureCanvas.height = h;
+      ctx.drawImage(cameraPreview, 0, 0, w, h);
+
+      // Update thumbnail
+      thumbCtx.drawImage(cameraPreview, 0, 0, 160, 120);
+
+      // Send frame as base64 JPEG
+      var dataUrl = captureCanvas.toDataURL("image/jpeg", 0.7);
+      var base64 = dataUrl.split(",")[1];
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "video", data: base64 }));
+      }
+    }, 500);
+  }
+
+  function stopFrameCapture() {
+    if (frameInterval) {
+      clearInterval(frameInterval);
+      frameInterval = null;
+    }
+  }
+
+  // ---- Audio Capture (PCM 16kHz via ScriptProcessor fallback for Safari) ----
+  function startAudioCapture() {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioCtx({ sampleRate: 16000 });
+
+    var source = audioContext.createMediaStreamSource(mediaStream);
+
+    // Safari doesn't reliably support AudioWorklet, so use ScriptProcessor
+    var bufferSize = 4096;
+    var processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+
+    processor.onaudioprocess = function(e) {
+      if (!sessionActive) return;
+      var float32 = e.inputBuffer.getChannelData(0);
+      // Convert Float32 to Int16 PCM
+      var int16 = new Int16Array(float32.length);
+      for (var i = 0; i < float32.length; i++) {
+        var s = Math.max(-1, Math.min(1, float32[i]));
+        int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      var bytes = new Uint8Array(int16.buffer);
+      var base64 = arrayBufferToBase64(bytes);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: "audio",
+          data: base64,
+          mime_type: "audio/pcm;rate=16000"
+        }));
+      }
+    };
+
+    source.connect(processor);
+    processor.connect(audioContext.destination);
+    audioWorkletNode = processor; // store ref for cleanup
+  }
+
+  function stopAudioCapture() {
+    if (audioWorkletNode) {
+      audioWorkletNode.disconnect();
+      audioWorkletNode = null;
+    }
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
+  }
+
+  function arrayBufferToBase64(buffer) {
+    var binary = "";
+    var bytes = new Uint8Array(buffer);
+    for (var i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  // ---- Audio Playback ----
+  function initPlayback() {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    playbackCtx = new AudioCtx({ sampleRate: 24000 });
+    // Resume on user gesture for Safari
+    if (playbackCtx.state === "suspended") {
+      playbackCtx.resume();
+    }
+  }
+
+  function playAudioChunk(base64Data, mimeType) {
+    if (!playbackCtx) initPlayback();
+
+    var raw = atob(base64Data);
+    var bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) {
+      bytes[i] = raw.charCodeAt(i);
+    }
+
+    // Determine sample rate from mime type
+    var sampleRate = 24000;
+    var rateMatch = mimeType && mimeType.match(/rate=(\d+)/);
+    if (rateMatch) sampleRate = parseInt(rateMatch[1]);
+
+    // Convert Int16 PCM to Float32
+    var int16 = new Int16Array(bytes.buffer);
+    var float32 = new Float32Array(int16.length);
+    for (var j = 0; j < int16.length; j++) {
+      float32[j] = int16[j] / 32768;
+    }
+
+    playbackQueue.push({ samples: float32, sampleRate: sampleRate });
+    if (!isPlaying) drainPlaybackQueue();
+  }
+
+  function drainPlaybackQueue() {
+    if (playbackQueue.length === 0) {
+      isPlaying = false;
+      return;
+    }
+    isPlaying = true;
+    var chunk = playbackQueue.shift();
+    var buffer = playbackCtx.createBuffer(1, chunk.samples.length, chunk.sampleRate);
+    buffer.getChannelData(0).set(chunk.samples);
+    var source = playbackCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(playbackCtx.destination);
+    source.onended = drainPlaybackQueue;
+    source.start();
+  }
+
+  // ---- WebSocket ----
+  function connectWebSocket() {
+    var url = wsUrlInput.value.trim() || getDefaultWsUrl();
+    ws = new WebSocket(url);
+
+    ws.onopen = function() {
+      console.log("WebSocket connected");
+      // Send language preference
+      ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
+      // Signal activity start
+      ws.send(JSON.stringify({ type: "activity_start" }));
+    };
+
+    ws.onmessage = function(event) {
+      var msg;
+      try {
+        msg = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
+      handleServerMessage(msg);
+    };
+
+    ws.onclose = function() {
+      console.log("WebSocket closed");
+      if (sessionActive) stopSession();
+    };
+
+    ws.onerror = function(err) {
+      console.error("WebSocket error", err);
+    };
+  }
+
+  function handleServerMessage(msg) {
+    switch (msg.type) {
+      case "audio":
+        playAudioChunk(msg.data, msg.mime_type);
+        break;
+
+      case "text":
+        addAgentTextCard(msg.text);
+        break;
+
+      case "input_transcription":
+        transcriptBar.classList.add("active");
+        transcriptText.textContent = msg.text;
+        break;
+
+      case "output_transcription":
+        // Could show agent transcript too; for now just log
+        break;
+
+      case "tool_result":
+        if (msg.results) {
+          msg.results.forEach(function(r) {
+            handleToolResult(r.tool, r.result);
+          });
+        }
+        break;
+
+      case "turn_complete":
+        // Agent finished speaking
+        break;
+
+      case "interrupted":
+        // Barge-in happened, clear playback queue
+        playbackQueue = [];
+        break;
+    }
+  }
+
+  // ---- Render Cards ----
+  function hideEmptyState() {
+    if (emptyState) emptyState.style.display = "none";
+  }
+
+  function addAgentTextCard(text) {
+    hideEmptyState();
+
+    // Check if text contains a JSON tutorial_card block
+    var jsonMatch = text.match(/```json\s*([\s\S]*?)```/);
+    var cleanText = text.replace(/```json\s*[\s\S]*?```/g, "").trim();
+
+    if (cleanText) {
+      var card = document.createElement("div");
+      card.className = "card agent-msg";
+
+      // Check for safety warnings
+      var lower = cleanText.toLowerCase();
+      if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("careful") !== -1 || lower.indexOf("hold on") !== -1) {
+        card.className = "card safety-warning";
+      }
+
+      card.innerHTML = '<p class="instruction">' + escapeHtml(cleanText) + '</p>';
+      cardsArea.appendChild(card);
+      scrollToBottom();
+    }
+
+    if (jsonMatch) {
+      try {
+        var data = JSON.parse(jsonMatch[1]);
+        if (data.tutorial_card) renderTutorialCard(data.tutorial_card);
+      } catch (e) { /* ignore parse errors */ }
+    }
+  }
+
+  function handleToolResult(toolName, result) {
+    hideEmptyState();
+
+    if (toolName === "analyze_task" && result) {
+      var card = document.createElement("div");
+      card.className = "card";
+      var html = '<div class="step-badge">Task Identified</div>';
+      html += '<p class="instruction">' + escapeHtml(result.task_description || "") + '</p>';
+      if (result.domain) {
+        html += '<p class="tools-needed"><strong>Domain:</strong> ' + escapeHtml(result.domain) + '</p>';
+      }
+      if (result.safety_warnings && result.safety_warnings.length > 0) {
+        result.safety_warnings.forEach(function(w) {
+          html += '<p class="tools-needed" style="color:#e74c3c"><strong>&#9888; Warning:</strong> ' + escapeHtml(w) + '</p>';
+        });
+      }
+      card.innerHTML = html;
+      cardsArea.appendChild(card);
+      scrollToBottom();
+    }
+
+    if (toolName === "generate_steps" && result && result.steps) {
+      result.steps.forEach(function(step) {
+        addStepCard(step, [], []);
+      });
+    }
+
+    if (toolName === "search_images" && result && Array.isArray(result)) {
+      // Attach images to the last step card if possible
+      var lastCard = cardsArea.querySelector(".card.step-card:last-of-type");
+      if (lastCard) {
+        result.forEach(function(img) {
+          if (img.image_url) {
+            var imgEl = document.createElement("img");
+            imgEl.className = "card-image";
+            imgEl.src = img.image_url;
+            imgEl.alt = img.title || "Reference image";
+            imgEl.loading = "lazy";
+            imgEl.addEventListener("click", function() { openLightbox(img.image_url); });
+            lastCard.appendChild(imgEl);
+          }
+        });
+      }
+    }
+
+    if (toolName === "search_youtube" && result && Array.isArray(result)) {
+      var lastCard = cardsArea.querySelector(".card:last-child");
+      if (lastCard) {
+        result.forEach(function(vid) {
+          if (vid.video_url) {
+            var a = document.createElement("a");
+            a.className = "yt-link";
+            a.href = vid.video_url;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.innerHTML = '<span class="yt-icon"></span> ' + escapeHtml(vid.title || "Watch video") +
+              (vid.duration ? ' (' + escapeHtml(vid.duration) + ')' : '');
+            lastCard.appendChild(a);
+          }
+        });
+      }
+    }
+  }
+
+  function renderTutorialCard(tc) {
+    if (tc.steps) {
+      tc.steps.forEach(function(step) {
+        addStepCard(step, tc.images || [], tc.videos || []);
+      });
+    }
+    if (tc.videos && tc.videos.length && (!tc.steps || !tc.steps.length)) {
+      tc.videos.forEach(function(vid) {
+        var card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = '<a class="yt-link" href="' + escapeAttr(vid.video_url || vid.url || "") +
+          '" target="_blank" rel="noopener"><span class="yt-icon"></span> ' +
+          escapeHtml(vid.title || "Watch video") + '</a>';
+        cardsArea.appendChild(card);
+      });
+      scrollToBottom();
+    }
+  }
+
+  function addStepCard(step, images, videos) {
+    var card = document.createElement("div");
+    card.className = "card step-card";
+    var html = '<div class="step-badge">Step ' + (step.number || "?") + '</div>';
+    html += '<p class="instruction">' + escapeHtml(step.instruction || "") + '</p>';
+    if (step.tools_needed && step.tools_needed.length) {
+      html += '<p class="tools-needed"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</p>';
+    }
+    card.innerHTML = html;
+
+    // Match image by step number or query if available
+    if (images && images.length) {
+      var idx = (step.number || 1) - 1;
+      var img = images[idx] || images[0];
+      if (img && (img.image_url || img.url)) {
+        var imgEl = document.createElement("img");
+        imgEl.className = "card-image";
+        imgEl.src = img.image_url || img.url;
+        imgEl.alt = img.title || "Step image";
+        imgEl.loading = "lazy";
+        imgEl.addEventListener("click", function() { openLightbox(imgEl.src); });
+        card.appendChild(imgEl);
+      }
+    }
+
+    cardsArea.appendChild(card);
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    cardsArea.scrollTop = cardsArea.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function escapeAttr(str) {
+    return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // ---- Session Control ----
+  async function startSession() {
+    try {
+      await startCamera();
+    } catch (e) {
+      return;
+    }
+
+    sessionActive = true;
+    startBtn.style.display = "none";
+    stopBtn.style.display = "inline-block";
+
+    // Switch camera to thumbnail mode
+    cameraPreview.classList.remove("active");
+    cameraThumb.classList.add("active");
+
+    listeningBar.classList.add("active");
+
+    initPlayback();
+    connectWebSocket();
+    startFrameCapture();
+    startAudioCapture();
+  }
+
+  function stopSession() {
+    sessionActive = false;
+    startBtn.style.display = "inline-block";
+    stopBtn.style.display = "none";
+
+    listeningBar.classList.remove("active");
+    transcriptBar.classList.remove("active");
+    cameraThumb.classList.remove("active");
+    cameraPreview.classList.remove("active");
+
+    stopFrameCapture();
+    stopAudioCapture();
+
+    if (ws) {
+      ws.send(JSON.stringify({ type: "activity_end" }));
+      ws.close();
+      ws = null;
+    }
+
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(function(t) { t.stop(); });
+      mediaStream = null;
+    }
+
+    playbackQueue = [];
+    isPlaying = false;
+    if (playbackCtx) {
+      playbackCtx.close();
+      playbackCtx = null;
+    }
+  }
+
+  startBtn.addEventListener("click", startSession);
+  stopBtn.addEventListener("click", stopSession);
+
+})();
+</script>
+</body>
+</html>
