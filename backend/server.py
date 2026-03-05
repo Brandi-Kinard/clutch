@@ -74,6 +74,8 @@ async def handle_client(websocket):
 
     run_config = RunConfig(
         response_modalities=[types.Modality.AUDIO],
+        output_audio_transcription=types.AudioTranscriptionConfig(),
+        input_audio_transcription=types.AudioTranscriptionConfig(),
     )
 
     # Task to consume events from the agent and forward to the client

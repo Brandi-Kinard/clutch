@@ -128,7 +128,7 @@ main {
   overflow: hidden;
 }
 
-/* ---- CAMERA PREVIEW ---- */
+/* ---- CAMERA PREVIEW (small viewport during session) ---- */
 .camera-container {
   position: relative;
   flex-shrink: 0;
@@ -141,13 +141,25 @@ main {
   display: none;
 }
 #camera-preview.active { display: block; }
+/* Small rounded preview during active session */
+#camera-preview.session-preview {
+  display: block;
+  width: 120px;
+  height: 90px;
+  border-radius: 12px;
+  position: fixed;
+  top: 80px;
+  right: 12px;
+  z-index: 20;
+  border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
 .camera-thumb {
   position: absolute;
   bottom: 8px;
   right: 8px;
   display: none;
 }
-.camera-thumb.active { display: block; }
 .camera-thumb canvas {
   width: 80px;
   height: 60px;
@@ -156,11 +168,8 @@ main {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-/* Full camera (before session), thumbnail (during session) */
-#camera-preview.thumb-mode { display: none; }
-
-/* ---- LISTENING INDICATOR ---- */
-.listening-bar {
+/* ---- STATUS INDICATOR ---- */
+.status-bar {
   display: none;
   align-items: center;
   justify-content: center;
@@ -169,19 +178,33 @@ main {
   background: var(--header-bg);
   flex-shrink: 0;
 }
-.listening-bar.active { display: flex; }
-.pulse-dot {
+.status-bar.active { display: flex; }
+.status-dot {
   width: 10px;
   height: 10px;
-  background: var(--accent-green);
   border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.green {
+  background: var(--accent-green);
   animation: pulse 1.5s ease-in-out infinite;
+}
+.status-dot.orange {
+  background: #f39c12;
+  animation: pulse 1s ease-in-out infinite;
+}
+.status-dot.blue {
+  background: #3498db;
+  animation: pulse 1s ease-in-out infinite;
+}
+.status-dot.gray {
+  background: #888;
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.7); }
 }
-.listening-bar span {
+.status-bar .status-text {
   color: #ccc;
   font-size: 13px;
   font-weight: 500;
@@ -285,6 +308,96 @@ main {
 }
 .card.agent-msg .instruction {
   font-size: 15px;
+}
+
+/* Agent transcript bubble */
+.card.agent-transcript {
+  background: #eef2ff;
+  border-left: 3px solid #6366f1;
+}
+.card.agent-transcript .label {
+  font-weight: 600;
+  color: #6366f1;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.card.agent-transcript .transcript-content {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.card.agent-transcript .transcript-content.partial {
+  color: #999;
+}
+/* Audio spectrum visualization while agent speaks */
+.card.agent-transcript .spectrum-viz {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+  padding: 4px 0;
+}
+.card.agent-transcript .spectrum-viz .bar {
+  width: 5px;
+  border-radius: 2px;
+  background: #6366f1;
+  transition: height 0.12s ease;
+}
+/* Fade transition for spectrum -> text */
+.card.agent-transcript .transcript-content {
+  transition: opacity 0.3s ease;
+}
+.card.agent-transcript .transcript-content.fade-in {
+  animation: fadeTextIn 0.35s ease forwards;
+}
+@keyframes fadeTextIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* User chat bubble */
+.card.user-bubble {
+  background: #e8f5e9;
+  border-left: 3px solid var(--accent-green);
+}
+.card.user-bubble .label {
+  font-weight: 600;
+  color: #2e7d32;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.card.user-bubble .user-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Thinking indicator */
+.thinking-card {
+  background: #f7f8fa;
+  border-left: 3px solid #f39c12;
+  display: none;
+}
+.thinking-card.active { display: block; }
+.thinking-card .thinking-text {
+  font-size: 14px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.thinking-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #aaa;
+  border-radius: 50%;
+  animation: thinkBounce 1.4s infinite both;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.16s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes thinkBounce {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
 }
 
 /* Safety warning card */
@@ -397,20 +510,15 @@ canvas.hidden-canvas { display: none; }
 </div>
 
 <main>
-  <!-- Camera preview (full size before session, hidden during) -->
+  <!-- Camera preview -->
   <div class="camera-container" id="camera-container">
     <video id="camera-preview" autoplay playsinline muted></video>
   </div>
 
-  <!-- Camera thumbnail during active session -->
-  <div class="camera-thumb" id="camera-thumb">
-    <canvas id="thumb-canvas" width="160" height="120"></canvas>
-  </div>
-
-  <!-- Listening indicator -->
-  <div class="listening-bar" id="listening-bar">
-    <div class="pulse-dot"></div>
-    <span>Listening...</span>
+  <!-- Status indicator bar -->
+  <div class="status-bar" id="status-bar">
+    <div class="status-dot green" id="status-dot"></div>
+    <span class="status-text" id="status-text">Ready</span>
   </div>
 
   <!-- Live transcript -->
@@ -423,6 +531,13 @@ canvas.hidden-canvas { display: none; }
     <div class="empty-state" id="empty-state">
       <div class="icon">&#128064;</div>
       <p>Point your camera at whatever you need help with,<br>then tap <strong>Start Session</strong>.</p>
+    </div>
+    <!-- Thinking indicator (moved into cards for flow) -->
+    <div class="card thinking-card" id="thinking-card">
+      <div class="thinking-text">
+        Clutch is thinking
+        <span class="thinking-dots"><span></span><span></span><span></span></span>
+      </div>
     </div>
   </div>
 </main>
@@ -441,37 +556,51 @@ canvas.hidden-canvas { display: none; }
   "use strict";
 
   // ---- State ----
-  let ws = null;
-  let mediaStream = null;
-  let audioContext = null;
-  let audioWorkletNode = null;
-  let frameInterval = null;
-  let sessionActive = false;
-  let playbackCtx = null;
-  let playbackQueue = [];
-  let isPlaying = false;
+  var ws = null;
+  var mediaStream = null;
+  var audioContext = null;
+  var audioWorkletNode = null;
+  var micGainNode = null;
+  var frameInterval = null;
+  var sessionActive = false;
+  var playbackCtx = null;
+  var nextPlayTime = 0;
+  var activeSources = [];
+  var agentSpeaking = false;
+
+  // Status: "ready", "listening", "thinking", "speaking"
+  var currentStatus = "ready";
+
+  // Agent transcript tracking
+  var currentAgentTranscriptCard = null;
+  var spectrumAnimFrame = null;
+  var activeSpectrumBars = null;
+
+  // Thinking debounce
+  var thinkingDebounceTimer = null;
 
   // ---- DOM refs ----
-  const startBtn = document.getElementById("start-btn");
-  const stopBtn = document.getElementById("stop-btn");
-  const cameraPreview = document.getElementById("camera-preview");
-  const cameraContainer = document.getElementById("camera-container");
-  const cameraThumb = document.getElementById("camera-thumb");
-  const thumbCanvas = document.getElementById("thumb-canvas");
-  const captureCanvas = document.getElementById("capture-canvas");
-  const cardsArea = document.getElementById("cards-area");
-  const emptyState = document.getElementById("empty-state");
-  const listeningBar = document.getElementById("listening-bar");
-  const transcriptBar = document.getElementById("transcript-bar");
-  const transcriptText = document.getElementById("transcript-text");
-  const langSelect = document.getElementById("lang-select");
-  const settingsBtn = document.getElementById("settings-btn");
-  const settingsModal = document.getElementById("settings-modal");
-  const wsUrlInput = document.getElementById("ws-url-input");
-  const modalCancel = document.getElementById("modal-cancel");
-  const modalSave = document.getElementById("modal-save");
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightbox-img");
+  var startBtn = document.getElementById("start-btn");
+  var stopBtn = document.getElementById("stop-btn");
+  var cameraPreview = document.getElementById("camera-preview");
+  var cameraContainer = document.getElementById("camera-container");
+  var captureCanvas = document.getElementById("capture-canvas");
+  var cardsArea = document.getElementById("cards-area");
+  var emptyState = document.getElementById("empty-state");
+  var statusBar = document.getElementById("status-bar");
+  var statusDot = document.getElementById("status-dot");
+  var statusText = document.getElementById("status-text");
+  var transcriptBar = document.getElementById("transcript-bar");
+  var transcriptText = document.getElementById("transcript-text");
+  var langSelect = document.getElementById("lang-select");
+  var settingsBtn = document.getElementById("settings-btn");
+  var settingsModal = document.getElementById("settings-modal");
+  var wsUrlInput = document.getElementById("ws-url-input");
+  var modalCancel = document.getElementById("modal-cancel");
+  var modalSave = document.getElementById("modal-save");
+  var lightbox = document.getElementById("lightbox");
+  var lightboxImg = document.getElementById("lightbox-img");
+  var thinkingCard = document.getElementById("thinking-card");
 
   // Derive default WS URL from the current page host
   function getDefaultWsUrl() {
@@ -483,6 +612,30 @@ canvas.hidden-canvas { display: none; }
   var savedUrl = localStorage.getItem("clutch_ws_url");
   wsUrlInput.value = savedUrl || getDefaultWsUrl();
   wsUrlInput.placeholder = getDefaultWsUrl();
+
+  // ---- Status Management ----
+  function setStatus(status) {
+    currentStatus = status;
+    switch (status) {
+      case "listening":
+        statusDot.className = "status-dot green";
+        statusText.textContent = "Listening...";
+        break;
+      case "thinking":
+        statusDot.className = "status-dot orange";
+        statusText.textContent = "Clutch is thinking...";
+        break;
+      case "speaking":
+        statusDot.className = "status-dot blue";
+        statusText.textContent = "Speaking...";
+        break;
+      case "ready":
+      default:
+        statusDot.className = "status-dot gray";
+        statusText.textContent = "Ready";
+        break;
+    }
+  }
 
   // ---- Settings Modal ----
   settingsBtn.addEventListener("click", function() {
@@ -525,11 +678,11 @@ canvas.hidden-canvas { display: none; }
           sampleRate: 16000,
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         }
       });
       cameraPreview.srcObject = mediaStream;
-      cameraPreview.classList.add("active");
     } catch (err) {
       alert("Camera/microphone access is required. Please allow permissions and try again.");
       throw err;
@@ -538,23 +691,17 @@ canvas.hidden-canvas { display: none; }
 
   // ---- Frame Capture ----
   function startFrameCapture() {
-    const ctx = captureCanvas.getContext("2d");
-    const thumbCtx = thumbCanvas.getContext("2d");
+    var ctx = captureCanvas.getContext("2d");
 
     frameInterval = setInterval(function() {
       if (!cameraPreview.videoWidth) return;
 
-      // Capture at reduced resolution for bandwidth
       var w = 640;
       var h = Math.round(cameraPreview.videoHeight * (640 / cameraPreview.videoWidth));
       captureCanvas.width = w;
       captureCanvas.height = h;
       ctx.drawImage(cameraPreview, 0, 0, w, h);
 
-      // Update thumbnail
-      thumbCtx.drawImage(cameraPreview, 0, 0, 160, 120);
-
-      // Send frame as base64 JPEG
       var dataUrl = captureCanvas.toDataURL("image/jpeg", 0.7);
       var base64 = dataUrl.split(",")[1];
       if (ws && ws.readyState === WebSocket.OPEN) {
@@ -570,21 +717,24 @@ canvas.hidden-canvas { display: none; }
     }
   }
 
-  // ---- Audio Capture (PCM 16kHz via ScriptProcessor fallback for Safari) ----
+  // ---- Audio Capture (PCM 16kHz) ----
   function startAudioCapture() {
     var AudioCtx = window.AudioContext || window.webkitAudioContext;
     audioContext = new AudioCtx({ sampleRate: 16000 });
 
     var source = audioContext.createMediaStreamSource(mediaStream);
 
-    // Safari doesn't reliably support AudioWorklet, so use ScriptProcessor
+    // Gain node for echo cancellation (mute mic when agent speaks)
+    micGainNode = audioContext.createGain();
+    micGainNode.gain.value = 1.0;
+    source.connect(micGainNode);
+
     var bufferSize = 4096;
     var processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
     processor.onaudioprocess = function(e) {
       if (!sessionActive) return;
       var float32 = e.inputBuffer.getChannelData(0);
-      // Convert Float32 to Int16 PCM
       var int16 = new Int16Array(float32.length);
       for (var i = 0; i < float32.length; i++) {
         var s = Math.max(-1, Math.min(1, float32[i]));
@@ -601,9 +751,15 @@ canvas.hidden-canvas { display: none; }
       }
     };
 
-    source.connect(processor);
+    micGainNode.connect(processor);
     processor.connect(audioContext.destination);
-    audioWorkletNode = processor; // store ref for cleanup
+    audioWorkletNode = processor;
+  }
+
+  function setMicMuted(muted) {
+    if (micGainNode) {
+      micGainNode.gain.setTargetAtTime(muted ? 0.0 : 1.0, audioContext.currentTime, 0.03);
+    }
   }
 
   function stopAudioCapture() {
@@ -611,6 +767,7 @@ canvas.hidden-canvas { display: none; }
       audioWorkletNode.disconnect();
       audioWorkletNode = null;
     }
+    micGainNode = null;
     if (audioContext) {
       audioContext.close();
       audioContext = null;
@@ -626,11 +783,11 @@ canvas.hidden-canvas { display: none; }
     return btoa(binary);
   }
 
-  // ---- Audio Playback ----
+  // ---- Audio Playback (gapless, time-scheduled) ----
   function initPlayback() {
     var AudioCtx = window.AudioContext || window.webkitAudioContext;
     playbackCtx = new AudioCtx({ sampleRate: 24000 });
-    // Resume on user gesture for Safari
+    nextPlayTime = 0;
     if (playbackCtx.state === "suspended") {
       playbackCtx.resume();
     }
@@ -645,36 +802,158 @@ canvas.hidden-canvas { display: none; }
       bytes[i] = raw.charCodeAt(i);
     }
 
-    // Determine sample rate from mime type
     var sampleRate = 24000;
     var rateMatch = mimeType && mimeType.match(/rate=(\d+)/);
     if (rateMatch) sampleRate = parseInt(rateMatch[1]);
 
-    // Convert Int16 PCM to Float32
     var int16 = new Int16Array(bytes.buffer);
     var float32 = new Float32Array(int16.length);
     for (var j = 0; j < int16.length; j++) {
       float32[j] = int16[j] / 32768;
     }
 
-    playbackQueue.push({ samples: float32, sampleRate: sampleRate });
-    if (!isPlaying) drainPlaybackQueue();
-  }
+    var buffer = playbackCtx.createBuffer(1, float32.length, sampleRate);
+    buffer.getChannelData(0).set(float32);
 
-  function drainPlaybackQueue() {
-    if (playbackQueue.length === 0) {
-      isPlaying = false;
-      return;
-    }
-    isPlaying = true;
-    var chunk = playbackQueue.shift();
-    var buffer = playbackCtx.createBuffer(1, chunk.samples.length, chunk.sampleRate);
-    buffer.getChannelData(0).set(chunk.samples);
     var source = playbackCtx.createBufferSource();
     source.buffer = buffer;
     source.connect(playbackCtx.destination);
-    source.onended = drainPlaybackQueue;
-    source.start();
+
+    // Schedule seamlessly: start right after the previous chunk ends
+    var now = playbackCtx.currentTime;
+    var startTime = Math.max(now + 0.005, nextPlayTime);
+    source.start(startTime);
+    nextPlayTime = startTime + buffer.duration;
+
+    // Track active sources for interruption
+    activeSources.push(source);
+    source.onended = function() {
+      var idx = activeSources.indexOf(source);
+      if (idx !== -1) activeSources.splice(idx, 1);
+      // If no more sources playing, agent finished speaking
+      if (activeSources.length === 0 && agentSpeaking) {
+        agentSpeaking = false;
+        setMicMuted(false);
+        if (sessionActive) setStatus("listening");
+      }
+    };
+
+    // Agent is speaking — mute mic to prevent feedback
+    if (!agentSpeaking) {
+      agentSpeaking = true;
+      setMicMuted(true);
+      setStatus("speaking");
+      hideThinking();
+    }
+  }
+
+  function stopAllPlayback() {
+    activeSources.forEach(function(s) {
+      try { s.stop(); } catch (e) {}
+    });
+    activeSources = [];
+    nextPlayTime = 0;
+    agentSpeaking = false;
+    setMicMuted(false);
+  }
+
+  // ---- Thinking Indicator ----
+  function showThinking() {
+    thinkingCard.classList.add("active");
+    scrollToBottom();
+  }
+
+  function hideThinking() {
+    thinkingCard.classList.remove("active");
+    clearTimeout(thinkingDebounceTimer);
+  }
+
+  // ---- Audio Spectrum Visualization ----
+  function startSpectrumAnim(bars) {
+    activeSpectrumBars = bars;
+    function animate() {
+      if (!activeSpectrumBars) return;
+      for (var i = 0; i < activeSpectrumBars.length; i++) {
+        // Each bar gets a randomized height that varies over time
+        var base = 8 + Math.sin(Date.now() * 0.006 + i * 1.8) * 6;
+        var jitter = Math.random() * 10;
+        activeSpectrumBars[i].style.height = Math.max(3, base + jitter) + "px";
+      }
+      spectrumAnimFrame = requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  function stopSpectrumAnim() {
+    activeSpectrumBars = null;
+    if (spectrumAnimFrame) {
+      cancelAnimationFrame(spectrumAnimFrame);
+      spectrumAnimFrame = null;
+    }
+  }
+
+  // ---- Agent Transcript ----
+  function showAgentTranscript(text, isPartial) {
+    hideEmptyState();
+    hideThinking();
+
+    if (!currentAgentTranscriptCard) {
+      currentAgentTranscriptCard = document.createElement("div");
+      currentAgentTranscriptCard.className = "card agent-transcript";
+      currentAgentTranscriptCard.innerHTML = '<div class="label">Clutch:</div>';
+
+      // Start with spectrum visualization
+      var viz = document.createElement("div");
+      viz.className = "spectrum-viz";
+      for (var i = 0; i < 7; i++) {
+        var bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = "4px";
+        viz.appendChild(bar);
+      }
+      currentAgentTranscriptCard.appendChild(viz);
+
+      // Hidden text element, revealed on final
+      var content = document.createElement("div");
+      content.className = "transcript-content";
+      content.style.display = "none";
+      currentAgentTranscriptCard.appendChild(content);
+
+      cardsArea.insertBefore(currentAgentTranscriptCard, thinkingCard);
+
+      // Animate the bars
+      startSpectrumAnim(viz.querySelectorAll(".bar"));
+    }
+
+    var content = currentAgentTranscriptCard.querySelector(".transcript-content");
+    content.textContent = text;
+
+    if (isPartial) {
+      // Keep showing spectrum while partial
+      content.style.display = "none";
+    } else {
+      // Final transcript: stop spectrum, reveal text with animation
+      stopSpectrumAnim();
+      var viz = currentAgentTranscriptCard.querySelector(".spectrum-viz");
+      if (viz) viz.remove();
+      content.style.display = "";
+      content.classList.add("fade-in");
+      // Detach so next utterance gets a new card
+      currentAgentTranscriptCard = null;
+    }
+    scrollToBottom();
+  }
+
+  // ---- User Chat Bubble ----
+  function addUserBubble(text) {
+    hideEmptyState();
+    var card = document.createElement("div");
+    card.className = "card user-bubble";
+    card.innerHTML =
+      '<div class="label">You:</div>' +
+      '<div class="user-text">' + escapeHtml(text) + '</div>';
+    cardsArea.insertBefore(card, thinkingCard);
+    scrollToBottom();
   }
 
   // ---- WebSocket ----
@@ -684,10 +963,9 @@ canvas.hidden-canvas { display: none; }
 
     ws.onopen = function() {
       console.log("WebSocket connected");
-      // Send language preference
       ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
-      // Signal activity start
       ws.send(JSON.stringify({ type: "activity_start" }));
+      setStatus("listening");
     };
 
     ws.onmessage = function(event) {
@@ -717,19 +995,43 @@ canvas.hidden-canvas { display: none; }
         break;
 
       case "text":
+        hideThinking();
         addAgentTextCard(msg.text);
         break;
 
       case "input_transcription":
         transcriptBar.classList.add("active");
         transcriptText.textContent = msg.text;
+        if (!msg.partial) {
+          var wordCount = (msg.text || "").trim().split(/\s+/).filter(Boolean).length;
+          if (wordCount > 3) {
+            // Add user bubble to conversation history
+            addUserBubble(msg.text);
+            // Debounce: wait 500ms before showing thinking
+            clearTimeout(thinkingDebounceTimer);
+            thinkingDebounceTimer = setTimeout(function() {
+              if (currentStatus === "listening" || currentStatus === "ready") {
+                setStatus("thinking");
+                showThinking();
+              }
+            }, 500);
+          }
+          // Short utterances (<=3 words) are likely noise — stay in listening
+        } else {
+          // Partial transcription — cancel any pending thinking transition
+          clearTimeout(thinkingDebounceTimer);
+        }
         break;
 
       case "output_transcription":
-        // Could show agent transcript too; for now just log
+        showAgentTranscript(msg.text, msg.partial);
+        if (!msg.partial) {
+          setStatus("speaking");
+        }
         break;
 
       case "tool_result":
+        hideThinking();
         if (msg.results) {
           msg.results.forEach(function(r) {
             handleToolResult(r.tool, r.result);
@@ -738,12 +1040,18 @@ canvas.hidden-canvas { display: none; }
         break;
 
       case "turn_complete":
-        // Agent finished speaking
+        // Agent finished this turn — session stays alive for follow-ups
+        hideThinking();
+        if (!agentSpeaking && sessionActive) {
+          setStatus("listening");
+        }
         break;
 
       case "interrupted":
-        // Barge-in happened, clear playback queue
-        playbackQueue = [];
+        // Barge-in: stop playback immediately
+        stopAllPlayback();
+        hideThinking();
+        if (sessionActive) setStatus("listening");
         break;
     }
   }
@@ -756,7 +1064,6 @@ canvas.hidden-canvas { display: none; }
   function addAgentTextCard(text) {
     hideEmptyState();
 
-    // Check if text contains a JSON tutorial_card block
     var jsonMatch = text.match(/```json\s*([\s\S]*?)```/);
     var cleanText = text.replace(/```json\s*[\s\S]*?```/g, "").trim();
 
@@ -764,14 +1071,13 @@ canvas.hidden-canvas { display: none; }
       var card = document.createElement("div");
       card.className = "card agent-msg";
 
-      // Check for safety warnings
       var lower = cleanText.toLowerCase();
       if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("careful") !== -1 || lower.indexOf("hold on") !== -1) {
         card.className = "card safety-warning";
       }
 
       card.innerHTML = '<p class="instruction">' + escapeHtml(cleanText) + '</p>';
-      cardsArea.appendChild(card);
+      cardsArea.insertBefore(card, thinkingCard);
       scrollToBottom();
     }
 
@@ -800,7 +1106,7 @@ canvas.hidden-canvas { display: none; }
         });
       }
       card.innerHTML = html;
-      cardsArea.appendChild(card);
+      cardsArea.insertBefore(card, thinkingCard);
       scrollToBottom();
     }
 
@@ -811,7 +1117,6 @@ canvas.hidden-canvas { display: none; }
     }
 
     if (toolName === "search_images" && result && Array.isArray(result)) {
-      // Attach images to the last step card if possible
       var lastCard = cardsArea.querySelector(".card.step-card:last-of-type");
       if (lastCard) {
         result.forEach(function(img) {
@@ -860,7 +1165,7 @@ canvas.hidden-canvas { display: none; }
         card.innerHTML = '<a class="yt-link" href="' + escapeAttr(vid.video_url || vid.url || "") +
           '" target="_blank" rel="noopener"><span class="yt-icon"></span> ' +
           escapeHtml(vid.title || "Watch video") + '</a>';
-        cardsArea.appendChild(card);
+        cardsArea.insertBefore(card, thinkingCard);
       });
       scrollToBottom();
     }
@@ -876,7 +1181,6 @@ canvas.hidden-canvas { display: none; }
     }
     card.innerHTML = html;
 
-    // Match image by step number or query if available
     if (images && images.length) {
       var idx = (step.number || 1) - 1;
       var img = images[idx] || images[0];
@@ -891,7 +1195,7 @@ canvas.hidden-canvas { display: none; }
       }
     }
 
-    cardsArea.appendChild(card);
+    cardsArea.insertBefore(card, thinkingCard);
     scrollToBottom();
   }
 
@@ -921,11 +1225,12 @@ canvas.hidden-canvas { display: none; }
     startBtn.style.display = "none";
     stopBtn.style.display = "inline-block";
 
-    // Switch camera to thumbnail mode
+    // Show camera as small floating preview
     cameraPreview.classList.remove("active");
-    cameraThumb.classList.add("active");
+    cameraPreview.classList.add("session-preview");
 
-    listeningBar.classList.add("active");
+    statusBar.classList.add("active");
+    setStatus("ready");
 
     initPlayback();
     connectWebSocket();
@@ -938,16 +1243,22 @@ canvas.hidden-canvas { display: none; }
     startBtn.style.display = "inline-block";
     stopBtn.style.display = "none";
 
-    listeningBar.classList.remove("active");
+    statusBar.classList.remove("active");
     transcriptBar.classList.remove("active");
-    cameraThumb.classList.remove("active");
     cameraPreview.classList.remove("active");
+    cameraPreview.classList.remove("session-preview");
+    hideThinking();
+    stopSpectrumAnim();
+    currentAgentTranscriptCard = null;
 
     stopFrameCapture();
     stopAudioCapture();
+    stopAllPlayback();
 
     if (ws) {
-      ws.send(JSON.stringify({ type: "activity_end" }));
+      try {
+        ws.send(JSON.stringify({ type: "activity_end" }));
+      } catch (e) {}
       ws.close();
       ws = null;
     }
@@ -957,8 +1268,6 @@ canvas.hidden-canvas { display: none; }
       mediaStream = null;
     }
 
-    playbackQueue = [];
-    isPlaying = false;
     if (playbackCtx) {
       playbackCtx.close();
       playbackCtx = null;
