@@ -13,6 +13,7 @@
   --header-bg: #1a1a2e;
   --accent-green: #2ecc71;
   --accent-red: #e74c3c;
+  --accent-blue: #3498db;
   --card-bg: #ffffff;
   --body-bg: #f0f2f5;
   --text-primary: #1a1a2e;
@@ -35,7 +36,7 @@ html, body {
 header {
   background: var(--header-bg);
   color: #fff;
-  padding: 16px 20px 12px;
+  padding: 14px 20px 10px;
   position: relative;
   z-index: 10;
 }
@@ -44,21 +45,9 @@ header .top-row {
   align-items: center;
   justify-content: space-between;
 }
-header h1 {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-header .tagline {
-  font-size: 12px;
-  color: #aaa;
-  margin-top: 2px;
-}
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+header .tagline { font-size: 11px; color: #aaa; margin-top: 1px; }
+.header-controls { display: flex; align-items: center; gap: 12px; }
 #lang-select {
   background: rgba(255,255,255,0.12);
   color: #fff;
@@ -71,51 +60,31 @@ header .tagline {
 }
 #lang-select option { color: #000; }
 .settings-btn {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
+  background: none; border: none; color: #aaa;
+  font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
 }
 
 /* ---- SETTINGS MODAL ---- */
 .modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 100;
+  align-items: center; justify-content: center;
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 24px;
-  width: 90%;
-  max-width: 360px;
+  background: #fff; border-radius: var(--radius);
+  padding: 24px; width: 90%; max-width: 360px;
 }
 .modal h2 { font-size: 18px; margin-bottom: 12px; }
 .modal label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
 .modal input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 15px;
-  margin-bottom: 16px;
+  width: 100%; padding: 10px; border: 1px solid #ddd;
+  border-radius: 8px; font-size: 15px; margin-bottom: 16px;
 }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .modal-actions button {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 8px 16px; border-radius: 8px; border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer;
 }
 .btn-cancel { background: #eee; color: #333; }
 .btn-save { background: var(--header-bg); color: #fff; }
@@ -124,273 +93,148 @@ header .tagline {
 main {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 76px);
+  height: calc(100% - 66px);
   overflow: hidden;
+  position: relative;
 }
 
-/* ---- CAMERA PREVIEW (small viewport during session) ---- */
-.camera-container {
-  position: relative;
-  flex-shrink: 0;
-}
+/* ---- CAMERA PREVIEW ---- */
 #camera-preview {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  background: #000;
   display: none;
 }
-#camera-preview.active { display: block; }
-/* Small rounded preview during active session */
 #camera-preview.session-preview {
   display: block;
-  width: 120px;
-  height: 90px;
-  border-radius: 12px;
+  width: 100px;
+  height: 75px;
+  border-radius: 10px;
   position: fixed;
-  top: 80px;
-  right: 12px;
+  top: 72px;
+  right: 10px;
   z-index: 20;
   border: 2px solid rgba(255,255,255,0.6);
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-}
-.camera-thumb {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  display: none;
-}
-.camera-thumb canvas {
-  width: 80px;
-  height: 60px;
-  border-radius: 6px;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  object-fit: cover;
 }
 
 /* ---- STATUS INDICATOR ---- */
 .status-bar {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px;
-  background: var(--header-bg);
-  flex-shrink: 0;
+  display: none; align-items: center; justify-content: center;
+  gap: 8px; padding: 6px; background: var(--header-bg); flex-shrink: 0;
 }
 .status-bar.active { display: flex; }
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.status-dot.green {
-  background: var(--accent-green);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-.status-dot.orange {
-  background: #f39c12;
-  animation: pulse 1s ease-in-out infinite;
-}
-.status-dot.blue {
-  background: #3498db;
-  animation: pulse 1s ease-in-out infinite;
-}
-.status-dot.gray {
-  background: #888;
-}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.green { background: var(--accent-green); animation: pulse 1.5s ease-in-out infinite; }
+.status-dot.orange { background: #f39c12; animation: pulse 1s ease-in-out infinite; }
+.status-dot.blue { background: var(--accent-blue); animation: pulse 1s ease-in-out infinite; }
+.status-dot.gray { background: #888; }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.7); }
 }
-.status-bar .status-text {
-  color: #ccc;
-  font-size: 13px;
-  font-weight: 500;
-}
+.status-bar .status-text { color: #ccc; font-size: 12px; font-weight: 500; }
 
-/* ---- TRANSCRIPT BAR ---- */
-.transcript-bar {
-  padding: 8px 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  color: var(--text-secondary);
-  min-height: 0;
-  flex-shrink: 0;
-  display: none;
-}
-.transcript-bar.active { display: block; }
-.transcript-bar .label { font-weight: 600; color: var(--text-primary); }
-
-/* ---- TUTORIAL CARDS ---- */
-.cards-area {
+/* ---- CHAT AREA ---- */
+.chat-area {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 12px 16px 120px;
+  padding: 10px 16px 100px;
 }
 
-.card {
-  background: var(--card-bg);
+.chat-card {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 16px;
-  margin-bottom: 12px;
-  animation: slideUp 0.3s ease-out;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  animation: slideUp 0.25s ease-out;
+  max-width: 88%;
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.card .step-badge {
-  display: inline-block;
-  background: var(--header-bg);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  margin-bottom: 8px;
-}
-.card .instruction {
-  font-size: 16px;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-.card .tools-needed {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-}
-.card .tools-needed strong { color: var(--text-primary); }
-.card .card-image {
-  width: 100%;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  max-height: 200px;
-  object-fit: cover;
-  background: #eee;
-}
-.card .yt-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #e74c3c;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-}
-.card .yt-link .yt-icon {
-  width: 20px;
-  height: 14px;
-  background: #e74c3c;
-  border-radius: 3px;
-  position: relative;
-  display: inline-block;
-}
-.card .yt-link .yt-icon::after {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 3px;
-  border-left: 7px solid #fff;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-}
 
-/* Agent text message card */
-.card.agent-msg {
-  background: #f7f8fa;
-  border-left: 3px solid var(--header-bg);
+/* User bubble */
+.chat-card.user-bubble {
+  background: #e8f5e9;
+  border-left: 3px solid var(--accent-green);
+  margin-left: auto;
 }
-.card.agent-msg .instruction {
-  font-size: 15px;
+.chat-card .bubble-label {
+  font-weight: 600; font-size: 11px; margin-bottom: 3px;
+  text-transform: uppercase; letter-spacing: 0.3px;
 }
+.chat-card.user-bubble .bubble-label { color: #2e7d32; }
+.chat-card .bubble-text { font-size: 15px; line-height: 1.4; }
 
-/* Agent transcript bubble */
-.card.agent-transcript {
+/* Agent bubble */
+.chat-card.agent-bubble {
   background: #eef2ff;
   border-left: 3px solid #6366f1;
 }
-.card.agent-transcript .label {
-  font-weight: 600;
-  color: #6366f1;
-  font-size: 12px;
-  margin-bottom: 4px;
+.chat-card.agent-bubble .bubble-label { color: #6366f1; }
+
+/* Spectrum viz in agent bubble */
+.chat-card .spectrum-viz {
+  display: flex; align-items: flex-end; gap: 3px; height: 24px; padding: 2px 0;
 }
-.card.agent-transcript .transcript-content {
-  font-size: 15px;
-  line-height: 1.5;
-}
-.card.agent-transcript .transcript-content.partial {
-  color: #999;
-}
-/* Audio spectrum visualization while agent speaks */
-.card.agent-transcript .spectrum-viz {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 28px;
-  padding: 4px 0;
-}
-.card.agent-transcript .spectrum-viz .bar {
-  width: 5px;
-  border-radius: 2px;
-  background: #6366f1;
+.chat-card .spectrum-viz .bar {
+  width: 5px; border-radius: 2px; background: #6366f1;
   transition: height 0.12s ease;
 }
-/* Fade transition for spectrum -> text */
-.card.agent-transcript .transcript-content {
-  transition: opacity 0.3s ease;
-}
-.card.agent-transcript .transcript-content.fade-in {
-  animation: fadeTextIn 0.35s ease forwards;
+.chat-card .bubble-text.fade-in {
+  animation: fadeTextIn 0.3s ease forwards;
 }
 @keyframes fadeTextIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* User chat bubble */
-.card.user-bubble {
-  background: #e8f5e9;
-  border-left: 3px solid var(--accent-green);
+/* Agent text card */
+.chat-card.agent-msg {
+  background: #f7f8fa;
+  border-left: 3px solid var(--header-bg);
 }
-.card.user-bubble .label {
-  font-weight: 600;
-  color: #2e7d32;
-  font-size: 12px;
-  margin-bottom: 4px;
+.chat-card.safety-warning {
+  background: #fff3cd;
+  border-left: 3px solid #ff9800;
 }
-.card.user-bubble .user-text {
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text-primary);
+
+/* ---- PROCEDURE CARD (tappable artifact) ---- */
+.procedure-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(26,26,46,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  animation: slideUp 0.3s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.procedure-card:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.procedure-card .proc-icon { font-size: 20px; margin-bottom: 6px; }
+.procedure-card .proc-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.procedure-card .proc-meta { font-size: 13px; color: rgba(255,255,255,0.7); }
+.procedure-card .proc-cta {
+  margin-top: 10px; font-size: 13px; font-weight: 600;
+  color: var(--accent-green); display: flex; align-items: center; gap: 4px;
 }
 
 /* Thinking indicator */
-.thinking-card {
-  background: #f7f8fa;
-  border-left: 3px solid #f39c12;
-  display: none;
+.chat-card.thinking-card {
+  background: #f7f8fa; border-left: 3px solid #f39c12;
+  display: none; max-width: 60%;
 }
-.thinking-card.active { display: block; }
-.thinking-card .thinking-text {
-  font-size: 14px;
-  color: #888;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.chat-card.thinking-card.active { display: block; }
+.thinking-text {
+  font-size: 13px; color: #888;
+  display: flex; align-items: center; gap: 6px;
 }
 .thinking-dots span {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: #aaa;
-  border-radius: 50%;
+  display: inline-block; width: 5px; height: 5px;
+  background: #aaa; border-radius: 50%;
   animation: thinkBounce 1.4s infinite both;
 }
 .thinking-dots span:nth-child(2) { animation-delay: 0.16s; }
@@ -400,74 +244,211 @@ main {
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* Safety warning card */
-.card.safety-warning {
-  background: #fff3cd;
-  border-left: 3px solid #ff9800;
-}
-
-/* ---- CONTROLS ---- */
-.controls {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, var(--body-bg) 20%);
-  display: flex;
-  justify-content: center;
-  z-index: 10;
-}
-#start-btn, #stop-btn {
-  border: none;
-  border-radius: 50px;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 16px 48px;
-  cursor: pointer;
-  transition: transform 0.15s, opacity 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-#start-btn:active, #stop-btn:active { transform: scale(0.95); }
-#start-btn {
-  background: var(--accent-green);
-  color: #fff;
-}
-#stop-btn {
-  background: var(--accent-red);
-  color: #fff;
-  display: none;
-}
-
-/* ---- IMAGE LIGHTBOX ---- */
-.lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.lightbox.open { display: flex; }
-.lightbox img {
-  max-width: 95%;
-  max-height: 90%;
-  border-radius: 8px;
-}
-
 /* ---- EMPTY STATE ---- */
 .empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #999;
+  text-align: center; padding: 40px 20px; color: #999;
 }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 .empty-state p { font-size: 15px; line-height: 1.5; }
 
-/* ---- HIDDEN ELEMENTS ---- */
+/* ---- CONTROLS ---- */
+.controls {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 14px 16px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--body-bg) 20%);
+  display: flex; justify-content: center; z-index: 10;
+}
+#start-btn, #stop-btn {
+  border: none; border-radius: 50px;
+  font-size: 18px; font-weight: 700;
+  padding: 14px 44px; cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+#start-btn:active, #stop-btn:active { transform: scale(0.95); }
+#start-btn { background: var(--accent-green); color: #fff; }
+#stop-btn { background: var(--accent-red); color: #fff; display: none; }
+
+/* ---- BOTTOM SHEET OVERLAY ---- */
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 50; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sheet-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ---- BOTTOM SHEET ---- */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60vh;
+  min-height: 340px;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+  z-index: 60;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.bottom-sheet.open { transform: translateY(0); }
+
+/* Drag handle */
+.sheet-handle {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+.sheet-handle .pill {
+  width: 36px; height: 4px;
+  background: #d0d0d0; border-radius: 2px;
+}
+
+/* Progress bar */
+.sheet-progress {
+  flex-shrink: 0;
+  height: 3px;
+  background: #eee;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.sheet-progress .bar {
+  height: 100%;
+  background: var(--accent-green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Step content */
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-circle {
+  width: 48px; height: 48px;
+  background: var(--header-bg);
+  color: #fff;
+  font-size: 22px; font-weight: 700;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.step-label-text {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.step-instruction {
+  font-size: 18px;
+  line-height: 1.55;
+  text-align: center;
+  max-width: 340px;
+  margin-bottom: 12px;
+}
+
+.step-tools {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.step-tools strong { color: var(--text-primary); }
+
+/* Completion screen */
+.completion-screen { text-align: center; padding: 20px 0; }
+.completion-screen .done-icon { font-size: 48px; margin-bottom: 12px; }
+.completion-screen .done-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.completion-screen .done-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+.completion-screen .videos-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-red); color: #fff;
+  border: none; border-radius: 10px;
+  padding: 12px 24px; font-size: 15px; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.completion-screen .videos-btn:active { transform: scale(0.97); }
+
+/* YouTube cards in sheet */
+.yt-list { width: 100%; max-width: 400px; }
+.yt-list .yt-item {
+  display: flex; text-decoration: none; color: inherit;
+  background: #f7f8fa; border-radius: 10px;
+  overflow: hidden; margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.yt-list .yt-item img {
+  width: 120px; min-height: 70px; object-fit: cover;
+  flex-shrink: 0; background: #eee;
+}
+.yt-list .yt-item .yt-info {
+  padding: 8px 10px; display: flex;
+  flex-direction: column; justify-content: center; min-width: 0;
+}
+.yt-list .yt-item .yt-title {
+  font-size: 13px; font-weight: 600; line-height: 1.3;
+  margin-bottom: 3px;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.yt-list .yt-item .yt-meta {
+  font-size: 11px; color: var(--text-secondary);
+}
+.yt-list .yt-item .yt-meta .dur { color: var(--accent-red); font-weight: 600; }
+
+/* Sheet navigation */
+.sheet-nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid #eee;
+}
+.sheet-nav button {
+  border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 600;
+  padding: 10px 24px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s;
+}
+.sheet-nav button:active { transform: scale(0.95); }
+.sheet-nav .btn-back { background: #eee; color: #333; }
+.sheet-nav .btn-back:disabled { opacity: 0.3; }
+.sheet-nav .btn-next { background: var(--accent-green); color: #fff; }
+.sheet-nav .btn-next.done { background: var(--header-bg); }
+.sheet-nav .btn-skip {
+  background: none; border: none; color: #aaa;
+  font-size: 13px; font-weight: 500; padding: 8px;
+  cursor: pointer;
+}
+
+/* ---- LIGHTBOX ---- */
+.lightbox {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85); z-index: 200;
+  align-items: center; justify-content: center; cursor: pointer;
+}
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 95%; max-height: 90%; border-radius: 8px; }
+
+/* ---- HIDDEN ---- */
 canvas.hidden-canvas { display: none; }
 </style>
 </head>
@@ -504,36 +485,28 @@ canvas.hidden-canvas { display: none; }
   </div>
 </div>
 
-<!-- Image Lightbox -->
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox">
-  <img id="lightbox-img" src="" alt="Enlarged image">
+  <img id="lightbox-img" src="" alt="">
 </div>
 
 <main>
-  <!-- Camera preview -->
-  <div class="camera-container" id="camera-container">
+  <div class="camera-container">
     <video id="camera-preview" autoplay playsinline muted></video>
   </div>
 
-  <!-- Status indicator bar -->
   <div class="status-bar" id="status-bar">
     <div class="status-dot green" id="status-dot"></div>
     <span class="status-text" id="status-text">Ready</span>
   </div>
 
-  <!-- Live transcript -->
-  <div class="transcript-bar" id="transcript-bar">
-    <span class="label">You: </span><span id="transcript-text"></span>
-  </div>
-
-  <!-- Tutorial cards list -->
-  <div class="cards-area" id="cards-area">
+  <!-- LAYER 1: Chat area -->
+  <div class="chat-area" id="chat-area">
     <div class="empty-state" id="empty-state">
       <div class="icon">&#128064;</div>
       <p>Point your camera at whatever you need help with,<br>then tap <strong>Start Session</strong>.</p>
     </div>
-    <!-- Thinking indicator (moved into cards for flow) -->
-    <div class="card thinking-card" id="thinking-card">
+    <div class="chat-card thinking-card" id="thinking-card">
       <div class="thinking-text">
         Clutch is thinking
         <span class="thinking-dots"><span></span><span></span><span></span></span>
@@ -543,9 +516,24 @@ canvas.hidden-canvas { display: none; }
 </main>
 
 <!-- Controls -->
-<div class="controls">
+<div class="controls" id="controls">
   <button id="start-btn">Start Session</button>
   <button id="stop-btn">Stop Session</button>
+</div>
+
+<!-- LAYER 2: Bottom sheet overlay -->
+<div class="sheet-overlay" id="sheet-overlay"></div>
+
+<!-- LAYER 2: Bottom sheet wizard -->
+<div class="bottom-sheet" id="bottom-sheet">
+  <div class="sheet-handle"><div class="pill"></div></div>
+  <div class="sheet-progress"><div class="bar" id="sheet-progress-bar"></div></div>
+  <div class="sheet-body" id="sheet-body"></div>
+  <div class="sheet-nav" id="sheet-nav">
+    <button class="btn-back" id="sheet-back" disabled>&#8592; Back</button>
+    <button class="btn-skip" id="sheet-skip">Skip</button>
+    <button class="btn-next" id="sheet-next">Next &#8594;</button>
+  </div>
 </div>
 
 <!-- Hidden canvas for frame capture -->
@@ -555,7 +543,7 @@ canvas.hidden-canvas { display: none; }
 (function() {
   "use strict";
 
-  // ---- State ----
+  // ==== State ====
   var ws = null;
   var mediaStream = null;
   var audioContext = null;
@@ -567,31 +555,29 @@ canvas.hidden-canvas { display: none; }
   var nextPlayTime = 0;
   var activeSources = [];
   var agentSpeaking = false;
-
-  // Status: "ready", "listening", "thinking", "speaking"
   var currentStatus = "ready";
-
-  // Agent transcript tracking
   var currentAgentTranscriptCard = null;
   var spectrumAnimFrame = null;
   var activeSpectrumBars = null;
-
-  // Thinking debounce
   var thinkingDebounceTimer = null;
 
-  // ---- DOM refs ----
+  // Wizard state
+  var wizardSteps = [];
+  var wizardTask = "";
+  var wizardCurrentStep = 0; // 0-indexed
+  var wizardOpen = false;
+  var youtubeResults = [];
+
+  // ==== DOM refs ====
   var startBtn = document.getElementById("start-btn");
   var stopBtn = document.getElementById("stop-btn");
   var cameraPreview = document.getElementById("camera-preview");
-  var cameraContainer = document.getElementById("camera-container");
   var captureCanvas = document.getElementById("capture-canvas");
-  var cardsArea = document.getElementById("cards-area");
+  var chatArea = document.getElementById("chat-area");
   var emptyState = document.getElementById("empty-state");
   var statusBar = document.getElementById("status-bar");
   var statusDot = document.getElementById("status-dot");
-  var statusText = document.getElementById("status-text");
-  var transcriptBar = document.getElementById("transcript-bar");
-  var transcriptText = document.getElementById("transcript-text");
+  var statusTextEl = document.getElementById("status-text");
   var langSelect = document.getElementById("lang-select");
   var settingsBtn = document.getElementById("settings-btn");
   var settingsModal = document.getElementById("settings-modal");
@@ -601,49 +587,55 @@ canvas.hidden-canvas { display: none; }
   var lightbox = document.getElementById("lightbox");
   var lightboxImg = document.getElementById("lightbox-img");
   var thinkingCard = document.getElementById("thinking-card");
+  var controls = document.getElementById("controls");
 
-  // Derive default WS URL from the current page host
+  // Bottom sheet
+  var sheetOverlay = document.getElementById("sheet-overlay");
+  var bottomSheet = document.getElementById("bottom-sheet");
+  var sheetBody = document.getElementById("sheet-body");
+  var sheetProgressBar = document.getElementById("sheet-progress-bar");
+  var sheetNav = document.getElementById("sheet-nav");
+  var sheetBack = document.getElementById("sheet-back");
+  var sheetNext = document.getElementById("sheet-next");
+  var sheetSkip = document.getElementById("sheet-skip");
+
+  // ==== Helpers ====
   function getDefaultWsUrl() {
     var proto = location.protocol === "https:" ? "wss:" : "ws:";
     return proto + "//" + location.host;
   }
-
-  // Load saved WS URL or use auto-detected default
   var savedUrl = localStorage.getItem("clutch_ws_url");
   wsUrlInput.value = savedUrl || getDefaultWsUrl();
   wsUrlInput.placeholder = getDefaultWsUrl();
 
-  // ---- Status Management ----
-  function setStatus(status) {
-    currentStatus = status;
-    switch (status) {
-      case "listening":
-        statusDot.className = "status-dot green";
-        statusText.textContent = "Listening...";
-        break;
-      case "thinking":
-        statusDot.className = "status-dot orange";
-        statusText.textContent = "Clutch is thinking...";
-        break;
-      case "speaking":
-        statusDot.className = "status-dot blue";
-        statusText.textContent = "Speaking...";
-        break;
-      case "ready":
-      default:
-        statusDot.className = "status-dot gray";
-        statusText.textContent = "Ready";
-        break;
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function escapeAttr(str) {
+    return str.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+  function hideEmptyState() { if (emptyState) emptyState.style.display = "none"; }
+  function scrollChat() { chatArea.scrollTop = chatArea.scrollHeight; }
+
+  // ==== Status ====
+  function setStatus(s) {
+    currentStatus = s;
+    var dotClass = "status-dot ", txt = "";
+    switch (s) {
+      case "listening":  dotClass += "green";  txt = "Listening..."; break;
+      case "thinking":   dotClass += "orange"; txt = "Clutch is thinking..."; break;
+      case "speaking":   dotClass += "blue";   txt = "Speaking..."; break;
+      default:           dotClass += "gray";   txt = "Ready"; break;
     }
+    statusDot.className = dotClass;
+    statusTextEl.textContent = txt;
   }
 
-  // ---- Settings Modal ----
-  settingsBtn.addEventListener("click", function() {
-    settingsModal.classList.add("open");
-  });
-  modalCancel.addEventListener("click", function() {
-    settingsModal.classList.remove("open");
-  });
+  // ==== Settings Modal ====
+  settingsBtn.addEventListener("click", function() { settingsModal.classList.add("open"); });
+  modalCancel.addEventListener("click", function() { settingsModal.classList.remove("open"); });
   modalSave.addEventListener("click", function() {
     localStorage.setItem("clutch_ws_url", wsUrlInput.value.trim());
     settingsModal.classList.remove("open");
@@ -652,340 +644,312 @@ canvas.hidden-canvas { display: none; }
     if (e.target === settingsModal) settingsModal.classList.remove("open");
   });
 
-  // ---- Lightbox ----
-  lightbox.addEventListener("click", function() {
-    lightbox.classList.remove("open");
-  });
+  // ==== Lightbox ====
+  lightbox.addEventListener("click", function() { lightbox.classList.remove("open"); });
 
-  function openLightbox(src) {
-    lightboxImg.src = src;
-    lightbox.classList.add("open");
-  }
-
-  // ---- Language selector ----
+  // ==== Language ====
   langSelect.addEventListener("change", function() {
-    if (ws && ws.readyState === WebSocket.OPEN) {
+    if (ws && ws.readyState === WebSocket.OPEN)
       ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
-    }
   });
 
-  // ---- Camera ----
+  // ==== Camera ====
   async function startCamera() {
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: {
-          sampleRate: 16000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
+        audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
       cameraPreview.srcObject = mediaStream;
     } catch (err) {
-      alert("Camera/microphone access is required. Please allow permissions and try again.");
+      alert("Camera/microphone access is required.");
       throw err;
     }
   }
 
-  // ---- Frame Capture ----
+  // ==== Frame Capture ====
   function startFrameCapture() {
     var ctx = captureCanvas.getContext("2d");
-
     frameInterval = setInterval(function() {
       if (!cameraPreview.videoWidth) return;
-
-      var w = 640;
-      var h = Math.round(cameraPreview.videoHeight * (640 / cameraPreview.videoWidth));
-      captureCanvas.width = w;
-      captureCanvas.height = h;
+      var w = 640, h = Math.round(cameraPreview.videoHeight * (640 / cameraPreview.videoWidth));
+      captureCanvas.width = w; captureCanvas.height = h;
       ctx.drawImage(cameraPreview, 0, 0, w, h);
-
-      var dataUrl = captureCanvas.toDataURL("image/jpeg", 0.7);
-      var base64 = dataUrl.split(",")[1];
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "video", data: base64 }));
-      }
+      var b64 = captureCanvas.toDataURL("image/jpeg", 0.7).split(",")[1];
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: "video", data: b64 }));
     }, 500);
   }
+  function stopFrameCapture() { if (frameInterval) { clearInterval(frameInterval); frameInterval = null; } }
 
-  function stopFrameCapture() {
-    if (frameInterval) {
-      clearInterval(frameInterval);
-      frameInterval = null;
-    }
-  }
-
-  // ---- Audio Capture (PCM 16kHz) ----
+  // ==== Audio Capture ====
   function startAudioCapture() {
-    var AudioCtx = window.AudioContext || window.webkitAudioContext;
-    audioContext = new AudioCtx({ sampleRate: 16000 });
-
+    var AC = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AC({ sampleRate: 16000 });
     var source = audioContext.createMediaStreamSource(mediaStream);
-
-    // Gain node for echo cancellation (mute mic when agent speaks)
     micGainNode = audioContext.createGain();
     micGainNode.gain.value = 1.0;
     source.connect(micGainNode);
-
-    var bufferSize = 4096;
-    var processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
-
-    processor.onaudioprocess = function(e) {
+    var proc = audioContext.createScriptProcessor(4096, 1, 1);
+    proc.onaudioprocess = function(e) {
       if (!sessionActive) return;
-      var float32 = e.inputBuffer.getChannelData(0);
-      var int16 = new Int16Array(float32.length);
-      for (var i = 0; i < float32.length; i++) {
-        var s = Math.max(-1, Math.min(1, float32[i]));
-        int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      var f32 = e.inputBuffer.getChannelData(0);
+      var i16 = new Int16Array(f32.length);
+      for (var i = 0; i < f32.length; i++) {
+        var s = Math.max(-1, Math.min(1, f32[i]));
+        i16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
       }
-      var bytes = new Uint8Array(int16.buffer);
-      var base64 = arrayBufferToBase64(bytes);
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: "audio",
-          data: base64,
-          mime_type: "audio/pcm;rate=16000"
-        }));
-      }
+      var bytes = new Uint8Array(i16.buffer);
+      var b = ""; for (var j = 0; j < bytes.length; j++) b += String.fromCharCode(bytes[j]);
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: "audio", data: btoa(b), mime_type: "audio/pcm;rate=16000" }));
     };
-
-    micGainNode.connect(processor);
-    processor.connect(audioContext.destination);
-    audioWorkletNode = processor;
+    micGainNode.connect(proc);
+    proc.connect(audioContext.destination);
+    audioWorkletNode = proc;
   }
-
-  function setMicMuted(muted) {
-    if (micGainNode) {
-      micGainNode.gain.setTargetAtTime(muted ? 0.0 : 1.0, audioContext.currentTime, 0.03);
-    }
+  function setMicMuted(m) {
+    if (micGainNode && audioContext) micGainNode.gain.setTargetAtTime(m ? 0 : 1, audioContext.currentTime, 0.03);
   }
-
   function stopAudioCapture() {
-    if (audioWorkletNode) {
-      audioWorkletNode.disconnect();
-      audioWorkletNode = null;
-    }
+    if (audioWorkletNode) { audioWorkletNode.disconnect(); audioWorkletNode = null; }
     micGainNode = null;
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
+    if (audioContext) { audioContext.close(); audioContext = null; }
   }
 
-  function arrayBufferToBase64(buffer) {
-    var binary = "";
-    var bytes = new Uint8Array(buffer);
-    for (var i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-  }
-
-  // ---- Audio Playback (gapless, time-scheduled) ----
+  // ==== Audio Playback ====
   function initPlayback() {
-    var AudioCtx = window.AudioContext || window.webkitAudioContext;
-    playbackCtx = new AudioCtx({ sampleRate: 24000 });
+    var AC = window.AudioContext || window.webkitAudioContext;
+    playbackCtx = new AC({ sampleRate: 24000 });
     nextPlayTime = 0;
-    if (playbackCtx.state === "suspended") {
-      playbackCtx.resume();
-    }
+    if (playbackCtx.state === "suspended") playbackCtx.resume();
   }
-
-  function playAudioChunk(base64Data, mimeType) {
+  function playAudioChunk(b64, mime) {
     if (!playbackCtx) initPlayback();
-
-    var raw = atob(base64Data);
-    var bytes = new Uint8Array(raw.length);
-    for (var i = 0; i < raw.length; i++) {
-      bytes[i] = raw.charCodeAt(i);
-    }
-
-    var sampleRate = 24000;
-    var rateMatch = mimeType && mimeType.match(/rate=(\d+)/);
-    if (rateMatch) sampleRate = parseInt(rateMatch[1]);
-
-    var int16 = new Int16Array(bytes.buffer);
-    var float32 = new Float32Array(int16.length);
-    for (var j = 0; j < int16.length; j++) {
-      float32[j] = int16[j] / 32768;
-    }
-
-    var buffer = playbackCtx.createBuffer(1, float32.length, sampleRate);
-    buffer.getChannelData(0).set(float32);
-
-    var source = playbackCtx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(playbackCtx.destination);
-
-    // Schedule seamlessly: start right after the previous chunk ends
+    var raw = atob(b64), bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    var sr = 24000, m = mime && mime.match(/rate=(\d+)/);
+    if (m) sr = parseInt(m[1]);
+    var i16 = new Int16Array(bytes.buffer), f32 = new Float32Array(i16.length);
+    for (var j = 0; j < i16.length; j++) f32[j] = i16[j] / 32768;
+    var buf = playbackCtx.createBuffer(1, f32.length, sr);
+    buf.getChannelData(0).set(f32);
+    var src = playbackCtx.createBufferSource();
+    src.buffer = buf; src.connect(playbackCtx.destination);
     var now = playbackCtx.currentTime;
-    var startTime = Math.max(now + 0.005, nextPlayTime);
-    source.start(startTime);
-    nextPlayTime = startTime + buffer.duration;
-
-    // Track active sources for interruption
-    activeSources.push(source);
-    source.onended = function() {
-      var idx = activeSources.indexOf(source);
+    var t = Math.max(now + 0.005, nextPlayTime);
+    src.start(t); nextPlayTime = t + buf.duration;
+    activeSources.push(src);
+    src.onended = function() {
+      var idx = activeSources.indexOf(src);
       if (idx !== -1) activeSources.splice(idx, 1);
-      // If no more sources playing, agent finished speaking
       if (activeSources.length === 0 && agentSpeaking) {
-        agentSpeaking = false;
-        setMicMuted(false);
+        agentSpeaking = false; setMicMuted(false);
         if (sessionActive) setStatus("listening");
       }
     };
-
-    // Agent is speaking — mute mic to prevent feedback
     if (!agentSpeaking) {
-      agentSpeaking = true;
-      setMicMuted(true);
-      setStatus("speaking");
-      hideThinking();
+      agentSpeaking = true; setMicMuted(true);
+      setStatus("speaking"); hideThinking();
     }
   }
-
   function stopAllPlayback() {
-    activeSources.forEach(function(s) {
-      try { s.stop(); } catch (e) {}
-    });
-    activeSources = [];
-    nextPlayTime = 0;
-    agentSpeaking = false;
-    setMicMuted(false);
+    activeSources.forEach(function(s) { try { s.stop(); } catch(e){} });
+    activeSources = []; nextPlayTime = 0; agentSpeaking = false; setMicMuted(false);
   }
 
-  // ---- Thinking Indicator ----
-  function showThinking() {
-    thinkingCard.classList.add("active");
-    scrollToBottom();
-  }
+  // ==== Thinking ====
+  function showThinking() { thinkingCard.classList.add("active"); scrollChat(); }
+  function hideThinking() { thinkingCard.classList.remove("active"); clearTimeout(thinkingDebounceTimer); }
 
-  function hideThinking() {
-    thinkingCard.classList.remove("active");
-    clearTimeout(thinkingDebounceTimer);
-  }
-
-  // ---- Audio Spectrum Visualization ----
+  // ==== Spectrum Visualization ====
   function startSpectrumAnim(bars) {
     activeSpectrumBars = bars;
-    function animate() {
+    function anim() {
       if (!activeSpectrumBars) return;
       for (var i = 0; i < activeSpectrumBars.length; i++) {
-        // Each bar gets a randomized height that varies over time
-        var base = 8 + Math.sin(Date.now() * 0.006 + i * 1.8) * 6;
-        var jitter = Math.random() * 10;
-        activeSpectrumBars[i].style.height = Math.max(3, base + jitter) + "px";
+        var h = 8 + Math.sin(Date.now() * 0.006 + i * 1.8) * 6 + Math.random() * 10;
+        activeSpectrumBars[i].style.height = Math.max(3, h) + "px";
       }
-      spectrumAnimFrame = requestAnimationFrame(animate);
+      spectrumAnimFrame = requestAnimationFrame(anim);
     }
-    animate();
+    anim();
   }
-
   function stopSpectrumAnim() {
     activeSpectrumBars = null;
-    if (spectrumAnimFrame) {
-      cancelAnimationFrame(spectrumAnimFrame);
-      spectrumAnimFrame = null;
-    }
+    if (spectrumAnimFrame) { cancelAnimationFrame(spectrumAnimFrame); spectrumAnimFrame = null; }
   }
 
-  // ---- Agent Transcript ----
-  function showAgentTranscript(text, isPartial) {
-    hideEmptyState();
-    hideThinking();
-
+  // ==== Agent Transcript (spectrum -> text) ====
+  function showAgentTranscript(text, partial) {
+    hideEmptyState(); hideThinking();
     if (!currentAgentTranscriptCard) {
       currentAgentTranscriptCard = document.createElement("div");
-      currentAgentTranscriptCard.className = "card agent-transcript";
-      currentAgentTranscriptCard.innerHTML = '<div class="label">Clutch:</div>';
-
-      // Start with spectrum visualization
-      var viz = document.createElement("div");
-      viz.className = "spectrum-viz";
-      for (var i = 0; i < 7; i++) {
-        var bar = document.createElement("div");
-        bar.className = "bar";
-        bar.style.height = "4px";
-        viz.appendChild(bar);
-      }
+      currentAgentTranscriptCard.className = "chat-card agent-bubble";
+      currentAgentTranscriptCard.innerHTML = '<div class="bubble-label">Clutch</div>';
+      var viz = document.createElement("div"); viz.className = "spectrum-viz";
+      for (var i = 0; i < 7; i++) { var bar = document.createElement("div"); bar.className = "bar"; bar.style.height = "4px"; viz.appendChild(bar); }
       currentAgentTranscriptCard.appendChild(viz);
-
-      // Hidden text element, revealed on final
-      var content = document.createElement("div");
-      content.className = "transcript-content";
-      content.style.display = "none";
-      currentAgentTranscriptCard.appendChild(content);
-
-      cardsArea.insertBefore(currentAgentTranscriptCard, thinkingCard);
-
-      // Animate the bars
+      var ct = document.createElement("div"); ct.className = "bubble-text"; ct.style.display = "none";
+      currentAgentTranscriptCard.appendChild(ct);
+      chatArea.insertBefore(currentAgentTranscriptCard, thinkingCard);
       startSpectrumAnim(viz.querySelectorAll(".bar"));
     }
-
-    var content = currentAgentTranscriptCard.querySelector(".transcript-content");
-    content.textContent = text;
-
-    if (isPartial) {
-      // Keep showing spectrum while partial
-      content.style.display = "none";
-    } else {
-      // Final transcript: stop spectrum, reveal text with animation
+    var ct = currentAgentTranscriptCard.querySelector(".bubble-text");
+    ct.textContent = text;
+    if (partial) { ct.style.display = "none"; }
+    else {
       stopSpectrumAnim();
-      var viz = currentAgentTranscriptCard.querySelector(".spectrum-viz");
-      if (viz) viz.remove();
-      content.style.display = "";
-      content.classList.add("fade-in");
-      // Detach so next utterance gets a new card
+      var v = currentAgentTranscriptCard.querySelector(".spectrum-viz"); if (v) v.remove();
+      ct.style.display = ""; ct.classList.add("fade-in");
       currentAgentTranscriptCard = null;
     }
-    scrollToBottom();
+    scrollChat();
   }
 
-  // ---- User Chat Bubble ----
+  // ==== User Bubble ====
   function addUserBubble(text) {
     hideEmptyState();
-    var card = document.createElement("div");
-    card.className = "card user-bubble";
-    card.innerHTML =
-      '<div class="label">You:</div>' +
-      '<div class="user-text">' + escapeHtml(text) + '</div>';
-    cardsArea.insertBefore(card, thinkingCard);
-    scrollToBottom();
+    var c = document.createElement("div"); c.className = "chat-card user-bubble";
+    c.innerHTML = '<div class="bubble-label">You</div><div class="bubble-text">' + escapeHtml(text) + '</div>';
+    chatArea.insertBefore(c, thinkingCard); scrollChat();
   }
 
-  // ---- WebSocket ----
+  // ==== Procedure Card (tappable artifact in chat) ====
+  function addProcedureCard(task, stepCount) {
+    hideEmptyState();
+    var c = document.createElement("div"); c.className = "procedure-card";
+    c.innerHTML =
+      '<div class="proc-icon">&#128295;</div>' +
+      '<div class="proc-title">' + escapeHtml(task) + '</div>' +
+      '<div class="proc-meta">' + stepCount + ' steps ready</div>' +
+      '<div class="proc-cta">Tap to start &#8594;</div>';
+    c.addEventListener("click", function() { openWizard(); });
+    chatArea.insertBefore(c, thinkingCard);
+    scrollChat();
+  }
+
+  // ==== Bottom Sheet Wizard ====
+  function openWizard() {
+    if (wizardSteps.length === 0) return;
+    wizardOpen = true;
+    wizardCurrentStep = 0;
+    sheetOverlay.classList.add("open");
+    bottomSheet.classList.add("open");
+    sheetNav.style.display = "flex";
+    renderWizardStep();
+    sendStepChange();
+  }
+  function closeWizard() {
+    wizardOpen = false;
+    sheetOverlay.classList.remove("open");
+    bottomSheet.classList.remove("open");
+  }
+  sheetOverlay.addEventListener("click", closeWizard);
+
+  function renderWizardStep() {
+    var step = wizardSteps[wizardCurrentStep];
+    var total = wizardSteps.length;
+    var pct = ((wizardCurrentStep + 1) / total) * 100;
+    sheetProgressBar.style.width = pct + "%";
+
+    sheetBody.innerHTML =
+      '<div class="step-circle">' + (step.number || (wizardCurrentStep + 1)) + '</div>' +
+      '<div class="step-label-text">Step ' + (step.number || (wizardCurrentStep + 1)) + ' of ' + total + '</div>' +
+      '<div class="step-instruction">' + escapeHtml(step.instruction || "") + '</div>' +
+      (step.tools_needed && step.tools_needed.length ?
+        '<div class="step-tools"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</div>' : '');
+
+    sheetBack.disabled = wizardCurrentStep === 0;
+    if (wizardCurrentStep === total - 1) {
+      sheetNext.textContent = "Done";
+      sheetNext.className = "btn-next done";
+    } else {
+      sheetNext.innerHTML = "Next &#8594;";
+      sheetNext.className = "btn-next";
+    }
+  }
+
+  function renderCompletion() {
+    sheetProgressBar.style.width = "100%";
+    sheetNav.style.display = "none";
+    var html = '<div class="completion-screen">' +
+      '<div class="done-icon">&#127881;</div>' +
+      '<div class="done-title">Nice work!</div>' +
+      '<div class="done-sub">You\'ve completed all ' + wizardSteps.length + ' steps.</div>';
+    if (youtubeResults.length > 0) {
+      html += '<button class="videos-btn" id="show-videos-btn">&#128250; Watch related videos</button>';
+    }
+    html += '</div>';
+    sheetBody.innerHTML = html;
+
+    if (youtubeResults.length > 0) {
+      document.getElementById("show-videos-btn").addEventListener("click", renderYouTubeList);
+    }
+  }
+
+  function renderYouTubeList() {
+    var html = '<div class="yt-list">';
+    youtubeResults.forEach(function(vid) {
+      if (!vid.video_url || vid.error) return;
+      html += '<a class="yt-item" href="' + escapeAttr(vid.video_url) + '" target="_blank" rel="noopener">' +
+        (vid.thumbnail ? '<img src="' + escapeAttr(vid.thumbnail) + '" alt="" loading="lazy">' : '') +
+        '<div class="yt-info">' +
+          '<div class="yt-title">' + escapeHtml(vid.title || "Watch video") + '</div>' +
+          '<div class="yt-meta">' + escapeHtml(vid.channel || "") +
+            (vid.duration ? ' &middot; <span class="dur">' + escapeHtml(vid.duration) + '</span>' : '') +
+          '</div>' +
+        '</div></a>';
+    });
+    html += '</div>';
+    sheetBody.innerHTML = html;
+    sheetNav.style.display = "none";
+  }
+
+  function sendStepChange() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: "step_change",
+        step_number: wizardCurrentStep + 1,
+        total_steps: wizardSteps.length
+      }));
+    }
+  }
+
+  sheetBack.addEventListener("click", function() {
+    if (wizardCurrentStep > 0) { wizardCurrentStep--; renderWizardStep(); sendStepChange(); }
+  });
+  sheetNext.addEventListener("click", function() {
+    if (wizardCurrentStep < wizardSteps.length - 1) {
+      wizardCurrentStep++; renderWizardStep(); sendStepChange();
+    } else {
+      renderCompletion();
+    }
+  });
+  sheetSkip.addEventListener("click", function() {
+    if (wizardCurrentStep < wizardSteps.length - 1) {
+      wizardCurrentStep++; renderWizardStep(); sendStepChange();
+    } else {
+      renderCompletion();
+    }
+  });
+
+  // ==== WebSocket ====
   function connectWebSocket() {
     var url = wsUrlInput.value.trim() || getDefaultWsUrl();
     ws = new WebSocket(url);
-
     ws.onopen = function() {
       console.log("WebSocket connected");
       ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
       ws.send(JSON.stringify({ type: "activity_start" }));
       setStatus("listening");
     };
-
-    ws.onmessage = function(event) {
-      var msg;
-      try {
-        msg = JSON.parse(event.data);
-      } catch (e) {
-        return;
-      }
+    ws.onmessage = function(ev) {
+      var msg; try { msg = JSON.parse(ev.data); } catch(e) { return; }
       handleServerMessage(msg);
     };
-
-    ws.onclose = function() {
-      console.log("WebSocket closed");
-      if (sessionActive) stopSession();
-    };
-
-    ws.onerror = function(err) {
-      console.error("WebSocket error", err);
-    };
+    ws.onclose = function() { console.log("WS closed"); if (sessionActive) stopSession(); };
+    ws.onerror = function(e) { console.error("WS error", e); };
   }
 
   function handleServerMessage(msg) {
@@ -993,245 +957,91 @@ canvas.hidden-canvas { display: none; }
       case "audio":
         playAudioChunk(msg.data, msg.mime_type);
         break;
-
       case "text":
         hideThinking();
         addAgentTextCard(msg.text);
         break;
-
       case "input_transcription":
-        transcriptBar.classList.add("active");
-        transcriptText.textContent = msg.text;
         if (!msg.partial) {
-          var wordCount = (msg.text || "").trim().split(/\s+/).filter(Boolean).length;
-          if (wordCount > 3) {
-            // Add user bubble to conversation history
+          var wc = (msg.text || "").trim().split(/\s+/).filter(Boolean).length;
+          if (wc > 3) {
             addUserBubble(msg.text);
-            // Debounce: wait 500ms before showing thinking
             clearTimeout(thinkingDebounceTimer);
             thinkingDebounceTimer = setTimeout(function() {
               if (currentStatus === "listening" || currentStatus === "ready") {
-                setStatus("thinking");
-                showThinking();
+                setStatus("thinking"); showThinking();
               }
             }, 500);
+            // If wizard is open and user says "ready"/"yes"/"let's go", it's already open
           }
-          // Short utterances (<=3 words) are likely noise — stay in listening
         } else {
-          // Partial transcription — cancel any pending thinking transition
           clearTimeout(thinkingDebounceTimer);
         }
         break;
-
       case "output_transcription":
         showAgentTranscript(msg.text, msg.partial);
-        if (!msg.partial) {
-          setStatus("speaking");
-        }
+        if (!msg.partial) setStatus("speaking");
         break;
-
       case "tool_result":
         hideThinking();
-        if (msg.results) {
-          msg.results.forEach(function(r) {
-            handleToolResult(r.tool, r.result);
-          });
-        }
+        if (msg.results) msg.results.forEach(function(r) { handleToolResult(r.tool, r.result); });
         break;
-
       case "turn_complete":
-        // Agent finished this turn — session stays alive for follow-ups
         hideThinking();
-        if (!agentSpeaking && sessionActive) {
-          setStatus("listening");
-        }
+        if (!agentSpeaking && sessionActive) setStatus("listening");
         break;
-
       case "interrupted":
-        // Barge-in: stop playback immediately
-        stopAllPlayback();
-        hideThinking();
+        stopAllPlayback(); hideThinking();
         if (sessionActive) setStatus("listening");
         break;
     }
   }
 
-  // ---- Render Cards ----
-  function hideEmptyState() {
-    if (emptyState) emptyState.style.display = "none";
-  }
-
   function addAgentTextCard(text) {
     hideEmptyState();
-
-    var jsonMatch = text.match(/```json\s*([\s\S]*?)```/);
-    var cleanText = text.replace(/```json\s*[\s\S]*?```/g, "").trim();
-
-    if (cleanText) {
-      var card = document.createElement("div");
-      card.className = "card agent-msg";
-
-      var lower = cleanText.toLowerCase();
-      if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("careful") !== -1 || lower.indexOf("hold on") !== -1) {
-        card.className = "card safety-warning";
+    var clean = text.replace(/```json\s*[\s\S]*?```/g, "").trim();
+    if (clean) {
+      var c = document.createElement("div");
+      var lower = clean.toLowerCase();
+      if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("hold on") !== -1) {
+        c.className = "chat-card safety-warning";
+      } else {
+        c.className = "chat-card agent-msg";
       }
-
-      card.innerHTML = '<p class="instruction">' + escapeHtml(cleanText) + '</p>';
-      cardsArea.insertBefore(card, thinkingCard);
-      scrollToBottom();
-    }
-
-    if (jsonMatch) {
-      try {
-        var data = JSON.parse(jsonMatch[1]);
-        if (data.tutorial_card) renderTutorialCard(data.tutorial_card);
-      } catch (e) { /* ignore parse errors */ }
+      c.innerHTML = '<div class="bubble-text">' + escapeHtml(clean) + '</div>';
+      chatArea.insertBefore(c, thinkingCard); scrollChat();
     }
   }
 
-  function handleToolResult(toolName, result) {
+  function handleToolResult(tool, result) {
     hideEmptyState();
+    console.log("Tool result:", tool, Array.isArray(result) ? "len=" + result.length : typeof result);
 
-    if (toolName === "analyze_task" && result) {
-      var card = document.createElement("div");
-      card.className = "card";
-      var html = '<div class="step-badge">Task Identified</div>';
-      html += '<p class="instruction">' + escapeHtml(result.task_description || "") + '</p>';
-      if (result.domain) {
-        html += '<p class="tools-needed"><strong>Domain:</strong> ' + escapeHtml(result.domain) + '</p>';
-      }
-      if (result.safety_warnings && result.safety_warnings.length > 0) {
-        result.safety_warnings.forEach(function(w) {
-          html += '<p class="tools-needed" style="color:#e74c3c"><strong>&#9888; Warning:</strong> ' + escapeHtml(w) + '</p>';
-        });
-      }
-      card.innerHTML = html;
-      cardsArea.insertBefore(card, thinkingCard);
-      scrollToBottom();
+    if (tool === "generate_steps" && result && result.steps && result.steps.length > 0) {
+      wizardSteps = result.steps;
+      // Derive task name from first step or use generic
+      wizardTask = result.task || result.steps[0].instruction.split(".")[0] || "Procedure";
+      if (wizardTask.length > 50) wizardTask = wizardTask.substring(0, 50) + "...";
+      addProcedureCard(wizardTask, result.steps.length);
     }
 
-    if (toolName === "generate_steps" && result && result.steps) {
-      result.steps.forEach(function(step) {
-        addStepCard(step, [], []);
-      });
+    if (tool === "search_youtube" && result && Array.isArray(result)) {
+      youtubeResults = result.filter(function(v) { return v.video_url && !v.error; });
+      console.log("Stored " + youtubeResults.length + " YouTube results for completion screen");
     }
 
-    if (toolName === "search_images" && result && Array.isArray(result)) {
-      var lastCard = cardsArea.querySelector(".card.step-card:last-of-type");
-      if (lastCard) {
-        result.forEach(function(img) {
-          if (img.image_url) {
-            var imgEl = document.createElement("img");
-            imgEl.className = "card-image";
-            imgEl.src = img.image_url;
-            imgEl.alt = img.title || "Reference image";
-            imgEl.loading = "lazy";
-            imgEl.addEventListener("click", function() { openLightbox(img.image_url); });
-            lastCard.appendChild(imgEl);
-          }
-        });
-      }
-    }
-
-    if (toolName === "search_youtube" && result && Array.isArray(result)) {
-      var lastCard = cardsArea.querySelector(".card:last-child");
-      if (lastCard) {
-        result.forEach(function(vid) {
-          if (vid.video_url) {
-            var a = document.createElement("a");
-            a.className = "yt-link";
-            a.href = vid.video_url;
-            a.target = "_blank";
-            a.rel = "noopener";
-            a.innerHTML = '<span class="yt-icon"></span> ' + escapeHtml(vid.title || "Watch video") +
-              (vid.duration ? ' (' + escapeHtml(vid.duration) + ')' : '');
-            lastCard.appendChild(a);
-          }
-        });
-      }
-    }
+    // search_images returns empty now, nothing to do
   }
 
-  function renderTutorialCard(tc) {
-    if (tc.steps) {
-      tc.steps.forEach(function(step) {
-        addStepCard(step, tc.images || [], tc.videos || []);
-      });
-    }
-    if (tc.videos && tc.videos.length && (!tc.steps || !tc.steps.length)) {
-      tc.videos.forEach(function(vid) {
-        var card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = '<a class="yt-link" href="' + escapeAttr(vid.video_url || vid.url || "") +
-          '" target="_blank" rel="noopener"><span class="yt-icon"></span> ' +
-          escapeHtml(vid.title || "Watch video") + '</a>';
-        cardsArea.insertBefore(card, thinkingCard);
-      });
-      scrollToBottom();
-    }
-  }
-
-  function addStepCard(step, images, videos) {
-    var card = document.createElement("div");
-    card.className = "card step-card";
-    var html = '<div class="step-badge">Step ' + (step.number || "?") + '</div>';
-    html += '<p class="instruction">' + escapeHtml(step.instruction || "") + '</p>';
-    if (step.tools_needed && step.tools_needed.length) {
-      html += '<p class="tools-needed"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</p>';
-    }
-    card.innerHTML = html;
-
-    if (images && images.length) {
-      var idx = (step.number || 1) - 1;
-      var img = images[idx] || images[0];
-      if (img && (img.image_url || img.url)) {
-        var imgEl = document.createElement("img");
-        imgEl.className = "card-image";
-        imgEl.src = img.image_url || img.url;
-        imgEl.alt = img.title || "Step image";
-        imgEl.loading = "lazy";
-        imgEl.addEventListener("click", function() { openLightbox(imgEl.src); });
-        card.appendChild(imgEl);
-      }
-    }
-
-    cardsArea.insertBefore(card, thinkingCard);
-    scrollToBottom();
-  }
-
-  function scrollToBottom() {
-    cardsArea.scrollTop = cardsArea.scrollHeight;
-  }
-
-  function escapeHtml(str) {
-    var div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  function escapeAttr(str) {
-    return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // ---- Session Control ----
+  // ==== Session Control ====
   async function startSession() {
-    try {
-      await startCamera();
-    } catch (e) {
-      return;
-    }
-
+    try { await startCamera(); } catch(e) { return; }
     sessionActive = true;
     startBtn.style.display = "none";
     stopBtn.style.display = "inline-block";
-
-    // Show camera as small floating preview
-    cameraPreview.classList.remove("active");
     cameraPreview.classList.add("session-preview");
-
     statusBar.classList.add("active");
     setStatus("ready");
-
     initPlayback();
     connectWebSocket();
     startFrameCapture();
@@ -1242,36 +1052,16 @@ canvas.hidden-canvas { display: none; }
     sessionActive = false;
     startBtn.style.display = "inline-block";
     stopBtn.style.display = "none";
-
     statusBar.classList.remove("active");
-    transcriptBar.classList.remove("active");
-    cameraPreview.classList.remove("active");
     cameraPreview.classList.remove("session-preview");
-    hideThinking();
-    stopSpectrumAnim();
+    hideThinking(); stopSpectrumAnim();
     currentAgentTranscriptCard = null;
-
-    stopFrameCapture();
-    stopAudioCapture();
-    stopAllPlayback();
-
-    if (ws) {
-      try {
-        ws.send(JSON.stringify({ type: "activity_end" }));
-      } catch (e) {}
-      ws.close();
-      ws = null;
-    }
-
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(function(t) { t.stop(); });
-      mediaStream = null;
-    }
-
-    if (playbackCtx) {
-      playbackCtx.close();
-      playbackCtx = null;
-    }
+    closeWizard();
+    wizardSteps = []; youtubeResults = [];
+    stopFrameCapture(); stopAudioCapture(); stopAllPlayback();
+    if (ws) { try { ws.send(JSON.stringify({ type: "activity_end" })); } catch(e){} ws.close(); ws = null; }
+    if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
+    if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   }
 
   startBtn.addEventListener("click", startSession);

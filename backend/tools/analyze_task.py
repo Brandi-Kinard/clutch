@@ -62,7 +62,7 @@ async def analyze_task(
 
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
     response = await client.aio.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=types.Content(role="user", parts=parts),
         config=types.GenerateContentConfig(
             response_mime_type="application/json",

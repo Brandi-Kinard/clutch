@@ -136,6 +136,21 @@ async def handle_client(websocket):
                 # Language preference or other session config from frontend
                 logger.info("Config update: %s", data)
 
+            elif msg_type == "step_change":
+                # User navigated to a different step in the wizard UI
+                step_num = data.get("step_number", 0)
+                total = data.get("total_steps", 0)
+                logger.info("User moved to step %d/%d", step_num, total)
+                # Send context to the agent so it knows which step the user is on
+                live_queue.send_content(
+                    types.Content(
+                        role="user",
+                        parts=[types.Part.from_text(
+                            text=f"[System: User is now viewing step {step_num} of {total} in the step-by-step guide on their screen.]"
+                        )],
+                    )
+                )
+
             elif msg_type in ("activity_start", "activity_end"):
                 # Ignored — Gemini Live API uses automatic voice activity detection
                 pass
@@ -187,21 +202,34 @@ def _event_to_message(event) -> dict | None:
             "partial": not event.output_transcription.finished,
         }
 
+    # Function calls (agent requesting tool execution) — log for debugging
+    function_calls = event.get_function_calls()
+    if function_calls:
+        for fc in function_calls:
+            logger.info("Tool call: %s(%s)", fc.name, ", ".join(f"{k}={v!r:.80s}" if isinstance(v, str) else f"{k}={v!r}" for k, v in (fc.args or {}).items()))
+
     # Function call results (tool outputs with tutorial card data)
     function_responses = event.get_function_responses()
     if function_responses:
         results = []
         for resp in function_responses:
-            if resp.response:
-                # resp.response may be a dict or a pydantic model
+            if resp.response is not None:
+                # resp.response may be a dict, list, or a pydantic model
                 result = resp.response
                 if hasattr(result, "model_dump"):
                     result = result.model_dump()
+                # ADK may wrap result in {"result": ...}; unwrap if so
+                if isinstance(result, dict) and "result" in result and len(result) == 1:
+                    result = result["result"]
+                logger.info("Tool response %s: type=%s keys=%s",
+                    resp.name, type(result).__name__,
+                    list(result.keys()) if isinstance(result, dict) else f"len={len(result)}" if isinstance(result, list) else "scalar")
                 results.append({
                     "tool": resp.name,
                     "result": result,
                 })
         if results:
+            logger.info("Tool results: %s", [r["tool"] for r in results])
             return {
                 "type": "tool_result",
                 "results": results,

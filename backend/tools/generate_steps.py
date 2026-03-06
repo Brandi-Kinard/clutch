@@ -48,7 +48,7 @@ async def generate_steps(task_description: str) -> dict:
     """
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
     response = await client.aio.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=types.Content(
             role="user",
             parts=[types.Part.from_text(text=STEPS_PROMPT + task_description)],

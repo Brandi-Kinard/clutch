@@ -1,45 +1,22 @@
-"""Tool: search for relevant images using Google Custom Search API."""
+"""Tool: search for relevant reference images (placeholder — image gen disabled)."""
 
-import os
+import logging
 
-from googleapiclient.discovery import build
+logger = logging.getLogger("clutch.tools.search_images")
 
 
-async def search_images(query: str, num_results: int = 3) -> list[dict]:
-    """Search for images related to a task step using Google Custom Search.
+async def search_images(query: str, num_results: int = 1) -> list[dict]:
+    """Search for reference images related to a task step.
+
+    Note: Image generation is currently disabled. Returns empty list.
+    The wizard UI focuses on clear text instructions instead.
 
     Args:
-        query: The search query for finding relevant how-to images.
-        num_results: Number of image results to return (default 3, max 10).
+        query: Description of what to illustrate.
+        num_results: Number of images (currently ignored).
 
     Returns:
-        List of dicts with title, image_url, thumbnail_url, and source_url.
+        Empty list (image generation disabled).
     """
-    api_key = os.environ.get("GOOGLE_SEARCH_API_KEY")
-    cx = os.environ.get("GOOGLE_SEARCH_CX")
-
-    if not api_key or not cx:
-        return [{"error": "Google Custom Search API key or CX not configured."}]
-
-    num_results = min(max(num_results, 1), 10)
-
-    try:
-        service = build("customsearch", "v1", developerKey=api_key)
-        result = (
-            service.cse()
-            .list(q=query, cx=cx, searchType="image", num=num_results, safe="active")
-            .execute()
-        )
-
-        images = []
-        for item in result.get("items", []):
-            images.append({
-                "title": item.get("title", ""),
-                "image_url": item.get("link", ""),
-                "thumbnail_url": item.get("image", {}).get("thumbnailLink", ""),
-                "source_url": item.get("image", {}).get("contextLink", ""),
-            })
-        return images
-
-    except Exception as e:
-        return [{"error": f"Image search failed: {str(e)}"}]
+    logger.info("search_images called for '%s' — image generation disabled, returning empty", query)
+    return []
