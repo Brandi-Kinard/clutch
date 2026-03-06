@@ -138,18 +138,10 @@ async def handle_client(websocket):
 
             elif msg_type == "step_change":
                 # User navigated to a different step in the wizard UI
+                # Just log it server-side — do NOT send to agent (it reads it aloud)
                 step_num = data.get("step_number", 0)
                 total = data.get("total_steps", 0)
                 logger.info("User moved to step %d/%d", step_num, total)
-                # Send context to the agent so it knows which step the user is on
-                live_queue.send_content(
-                    types.Content(
-                        role="user",
-                        parts=[types.Part.from_text(
-                            text=f"[INTERNAL CONTEXT — DO NOT READ ALOUD: The user navigated to step {step_num} of {total} in the wizard on their screen. Use this knowledge silently. Do not speak this message.]"
-                        )],
-                    )
-                )
 
             elif msg_type in ("activity_start", "activity_end"):
                 # Ignored — Gemini Live API uses automatic voice activity detection

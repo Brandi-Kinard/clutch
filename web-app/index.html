@@ -325,7 +325,7 @@ main {
   flex-shrink: 0;
   height: 3px;
   background: #eee;
-  margin: 0 16px;
+  margin: 4px 16px 0;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -843,11 +843,10 @@ canvas.hidden-canvas { display: none; }
     // Store steps snapshot on the card so it works even after session restart
     var cardSteps = wizardSteps.slice();
     var cardTask = task;
-    var cardYoutube = youtubeResults.slice();
     c.addEventListener("click", function() {
       wizardSteps = cardSteps;
       wizardTask = cardTask;
-      youtubeResults = cardYoutube;
+      // Use live youtubeResults (may have arrived after card was created)
       openWizard();
     });
     chatArea.insertBefore(c, thinkingCard);
@@ -1065,7 +1064,9 @@ canvas.hidden-canvas { display: none; }
         if (!msg.partial) setStatus("speaking");
         break;
       case "tool_result":
-        hideThinking();
+        // Do NOT call hideThinking() or stopAllPlayback() here —
+        // tool results arrive while the agent is still speaking.
+        // Let audio continue uninterrupted.
         if (msg.results) msg.results.forEach(function(r) { handleToolResult(r.tool, r.result); });
         break;
       case "turn_complete":
@@ -1109,7 +1110,9 @@ canvas.hidden-canvas { display: none; }
 
     if (tool === "search_youtube" && result && Array.isArray(result)) {
       youtubeResults = result.filter(function(v) { return v.video_url && !v.error; });
-      console.log("Stored " + youtubeResults.length + " YouTube results for completion screen");
+      console.log("YouTube: raw=" + result.length + " filtered=" + youtubeResults.length, youtubeResults);
+    } else if (tool === "search_youtube") {
+      console.warn("search_youtube returned unexpected result:", result);
     }
 
     // search_images returns empty now, nothing to do
