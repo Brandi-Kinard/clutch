@@ -664,15 +664,19 @@ canvas.hidden-canvas { display: none; }
   lightbox.addEventListener("click", function() { lightbox.classList.remove("open"); });
 
   // ==== Language ====
-  var langNames = { en: "English", es: "Spanish", vi: "Vietnamese", fr: "French" };
+  var langSwitchMessages = {
+    en: "LANGUAGE SWITCH: Speak only in English from now on. Confirm by saying 'Got it, switching to English.'",
+    es: "LANGUAGE SWITCH: From now on, speak ONLY in Spanish. Every single word must be in Spanish. Confirm by saying 'Entendido, ahora hablo en espa\u00f1ol.'",
+    vi: "LANGUAGE SWITCH: From now on, speak ONLY in Vietnamese. Every single word must be in Vietnamese. Confirm by saying '\u0110\u01b0\u1ee3c r\u1ed3i, b\u00e2y gi\u1edd t\u00f4i n\u00f3i ti\u1ebfng Vi\u1ec7t.'",
+    fr: "LANGUAGE SWITCH: From now on, speak ONLY in French. Every single word must be in French. Confirm by saying 'Compris, je parle maintenant en fran\u00e7ais.'"
+  };
   langSelect.addEventListener("change", function() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       var code = langSelect.value;
-      var name = langNames[code] || code;
       ws.send(JSON.stringify({ type: "config", language: code }));
-      // Tell the agent to switch languages mid-conversation
       if (sessionActive) {
-        ws.send(JSON.stringify({ type: "text", text: "Please respond in " + name + " from now on." }));
+        var msg = langSwitchMessages[code] || "LANGUAGE SWITCH: Speak only in " + code + " from now on.";
+        ws.send(JSON.stringify({ type: "text", text: msg }));
       }
     }
   });

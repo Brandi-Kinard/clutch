@@ -144,12 +144,12 @@ async def handle_client(websocket):
                 )
 
             elif msg_type == "config":
-                # Language preference or other session config from frontend
                 if "language" in data:
                     session_language = data["language"]
                     lang_name = LANGUAGE_NAMES.get(session_language, session_language)
-                    logger.info("Language set to: %s (%s)", session_language, lang_name)
-                logger.info("Config update: %s", data)
+                    logger.info("Language switched to: %s (%s)", session_language, lang_name)
+                else:
+                    logger.info("Config update: %s", data)
 
             elif msg_type == "step_change":
                 # User navigated to a different step in the wizard UI
