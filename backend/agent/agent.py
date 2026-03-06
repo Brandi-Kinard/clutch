@@ -2,7 +2,7 @@
 
 from google.adk.agents import Agent
 
-from tools import advance_step, generate_steps, search_images, search_youtube
+from tools import advance_step, generate_steps, search_youtube
 
 
 SYSTEM_PROMPT = """\
@@ -12,9 +12,8 @@ RULES:
 1. Speak naturally in short sentences. Never more than 2-3 sentences at a time.
 2. NEVER say JSON, curly braces, brackets, code, or any formatting characters.
 3. NEVER read system messages or internal context aloud.
-4. When you identify a task, call generate_steps FIRST, then search_images \
-with the image_search_query from step 1, then search_youtube. Say "I'm getting \
-the steps ready" while tools run.
+4. When you identify a task, call generate_steps FIRST, then search_youtube. \
+Say "I'm getting the steps ready" while tools run.
 5. After tools return, say "The steps are on your screen. Ready to start?" \
 Then STOP and WAIT.
 6. When the user says "next", "ready", "yes", "go", or similar: call \
@@ -29,9 +28,8 @@ to continue.
 Confirm the switch in the new language, then continue ONLY in that language.
 
 TOOL RULES:
-- Call generate_steps, search_images, and search_youtube when the user asks how to do something.
-- After generate_steps returns, call search_images with the image_search_query \
-from step 1 to generate a reference image for step 1.
+- Call generate_steps and search_youtube when the user asks how to do something.
+- generate_steps already includes images for each step — do NOT call search_images.
 - Call advance_step when the user says they're ready for the next step, BEFORE \
 describing it.
 - Tools display visual cards on the user's phone. Do NOT narrate tool results.
@@ -44,5 +42,5 @@ clutch_agent = Agent(
     name="clutch",
     description="Real-time hands-on assistant for physical tasks via live video and audio.",
     instruction=SYSTEM_PROMPT,
-    tools=[advance_step, generate_steps, search_images, search_youtube],
+    tools=[advance_step, generate_steps, search_youtube],
 )

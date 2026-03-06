@@ -1164,6 +1164,17 @@ canvas.hidden-canvas { display: none; }
 
     if (tool === "generate_steps" && result && result.steps && result.steps.length > 0) {
       wizardSteps = result.steps;
+      // Extract embedded images from each step into wizardImages
+      result.steps.forEach(function(step, idx) {
+        if (step.image_data_url) {
+          var key = step.image_search_query || ("step_" + idx);
+          wizardImages[key] = {
+            image_url: step.image_data_url,
+            title: step.image_search_query || ("Step " + (idx + 1)),
+            ai_generated: true,
+          };
+        }
+      });
       // Derive task name from first step or use generic
       wizardTask = result.task || result.steps[0].instruction.split(".")[0] || "Procedure";
       if (wizardTask.length > 50) wizardTask = wizardTask.substring(0, 50) + "...";
