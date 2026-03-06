@@ -98,12 +98,15 @@ async def handle_client(websocket):
                 live_request_queue=live_queue,
                 run_config=run_config,
             ):
-                msg = _event_to_message(event)
-                if msg:
-                    try:
-                        await websocket.send(json.dumps(msg, default=str))
-                    except TypeError:
-                        logger.warning("Skipping non-serializable event: %s", type(event))
+                msgs = _event_to_message(event)
+                if msgs:
+                    if not isinstance(msgs, list):
+                        msgs = [msgs]
+                    for msg in msgs:
+                        try:
+                            await websocket.send(json.dumps(msg, default=str))
+                        except TypeError:
+                            logger.warning("Skipping non-serializable event: %s", type(event))
         except Exception:
             logger.exception("Error in event stream")
 
@@ -219,7 +222,11 @@ def _event_to_message(event) -> dict | None:
     function_responses = event.get_function_responses()
     if function_responses:
         results = []
+        has_advance_step = False
         for resp in function_responses:
+            if resp.name == "advance_step":
+                has_advance_step = True
+                continue
             if resp.response is not None:
                 # resp.response may be a dict, list, or a pydantic model
                 result = resp.response
@@ -235,12 +242,15 @@ def _event_to_message(event) -> dict | None:
                     "tool": resp.name,
                     "result": result,
                 })
+        msgs = []
+        if has_advance_step:
+            logger.info("advance_step tool called — signaling frontend")
+            msgs.append({"type": "advance_step"})
         if results:
             logger.info("Tool results: %s", [r["tool"] for r in results])
-            return {
-                "type": "tool_result",
-                "results": results,
-            }
+            msgs.append({"type": "tool_result", "results": results})
+        if msgs:
+            return msgs if len(msgs) > 1 else msgs[0]
 
     # Turn complete signal
     if event.turn_complete:

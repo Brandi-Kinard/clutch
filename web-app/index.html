@@ -945,10 +945,10 @@ canvas.hidden-canvas { display: none; }
     sheetBody.innerHTML =
       '<div class="step-circle">' + (step.number || (wizardCurrentStep + 1)) + '</div>' +
       '<div class="step-label-text">Step ' + (step.number || (wizardCurrentStep + 1)) + ' of ' + total + '</div>' +
-      imgHtml +
       '<div class="step-instruction">' + escapeHtml(step.instruction || "") + '</div>' +
       (step.tools_needed && step.tools_needed.length ?
-        '<div class="step-tools"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</div>' : '');
+        '<div class="step-tools"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</div>' : '') +
+      imgHtml;
 
     // Wire up image tap -> lightbox
     var stepImg = sheetBody.querySelector(".step-image-wrap img");
@@ -1113,6 +1113,17 @@ canvas.hidden-canvas { display: none; }
       case "output_transcription":
         showAgentTranscript(msg.text, msg.partial);
         if (!msg.partial) setStatus("speaking");
+        break;
+      case "advance_step":
+        if (wizardOpen) {
+          if (wizardCurrentStep < wizardSteps.length - 1) {
+            wizardCurrentStep++;
+            renderWizardStep();
+            sendStepChange();
+          } else if (wizardCurrentStep === wizardSteps.length - 1) {
+            renderCompletion();
+          }
+        }
         break;
       case "tool_result":
         // Do NOT call hideThinking() or stopAllPlayback() here —
