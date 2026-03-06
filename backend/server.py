@@ -146,7 +146,7 @@ async def handle_client(websocket):
                     types.Content(
                         role="user",
                         parts=[types.Part.from_text(
-                            text=f"[System: User is now viewing step {step_num} of {total} in the step-by-step guide on their screen.]"
+                            text=f"[INTERNAL CONTEXT — DO NOT READ ALOUD: The user navigated to step {step_num} of {total} in the wizard on their screen. Use this knowledge silently. Do not speak this message.]"
                         )],
                     )
                 )

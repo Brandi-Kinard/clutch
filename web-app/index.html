@@ -297,17 +297,28 @@ main {
 }
 .bottom-sheet.open { transform: translateY(0); }
 
-/* Drag handle */
-.sheet-handle {
+/* Sheet header (handle + close) */
+.sheet-header {
   flex-shrink: 0;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 10px 0 4px;
+  padding: 10px 16px 4px;
+  position: relative;
 }
-.sheet-handle .pill {
+.sheet-header .pill {
   width: 36px; height: 4px;
   background: #d0d0d0; border-radius: 2px;
 }
+.sheet-close-btn {
+  position: absolute; right: 12px; top: 6px;
+  background: none; border: none;
+  font-size: 14px; font-weight: 600; color: #888;
+  cursor: pointer; padding: 6px 10px;
+  display: flex; align-items: center; gap: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-close-btn:active { color: #333; }
 
 /* Progress bar */
 .sheet-progress {
@@ -526,7 +537,10 @@ canvas.hidden-canvas { display: none; }
 
 <!-- LAYER 2: Bottom sheet wizard -->
 <div class="bottom-sheet" id="bottom-sheet">
-  <div class="sheet-handle"><div class="pill"></div></div>
+  <div class="sheet-header" id="sheet-header">
+    <div class="pill"></div>
+    <button class="sheet-close-btn" id="sheet-close-btn">&#10005; Close</button>
+  </div>
   <div class="sheet-progress"><div class="bar" id="sheet-progress-bar"></div></div>
   <div class="sheet-body" id="sheet-body"></div>
   <div class="sheet-nav" id="sheet-nav">
@@ -598,6 +612,8 @@ canvas.hidden-canvas { display: none; }
   var sheetBack = document.getElementById("sheet-back");
   var sheetNext = document.getElementById("sheet-next");
   var sheetSkip = document.getElementById("sheet-skip");
+  var sheetCloseBtn = document.getElementById("sheet-close-btn");
+  var sheetHeader = document.getElementById("sheet-header");
 
   // ==== Helpers ====
   function getDefaultWsUrl() {
@@ -824,7 +840,16 @@ canvas.hidden-canvas { display: none; }
       '<div class="proc-title">' + escapeHtml(task) + '</div>' +
       '<div class="proc-meta">' + stepCount + ' steps ready</div>' +
       '<div class="proc-cta">Tap to start &#8594;</div>';
-    c.addEventListener("click", function() { openWizard(); });
+    // Store steps snapshot on the card so it works even after session restart
+    var cardSteps = wizardSteps.slice();
+    var cardTask = task;
+    var cardYoutube = youtubeResults.slice();
+    c.addEventListener("click", function() {
+      wizardSteps = cardSteps;
+      wizardTask = cardTask;
+      youtubeResults = cardYoutube;
+      openWizard();
+    });
     chatArea.insertBefore(c, thinkingCard);
     scrollChat();
   }
@@ -846,6 +871,30 @@ canvas.hidden-canvas { display: none; }
     bottomSheet.classList.remove("open");
   }
   sheetOverlay.addEventListener("click", closeWizard);
+  sheetCloseBtn.addEventListener("click", closeWizard);
+
+  // Swipe-to-dismiss on the sheet header
+  (function() {
+    var startY = 0, currentY = 0, dragging = false;
+    sheetHeader.addEventListener("touchstart", function(e) {
+      startY = e.touches[0].clientY; currentY = startY; dragging = true;
+      bottomSheet.style.transition = "none";
+    });
+    sheetHeader.addEventListener("touchmove", function(e) {
+      if (!dragging) return;
+      currentY = e.touches[0].clientY;
+      var dy = Math.max(0, currentY - startY);
+      bottomSheet.style.transform = "translateY(" + dy + "px)";
+    });
+    sheetHeader.addEventListener("touchend", function() {
+      if (!dragging) return;
+      dragging = false;
+      bottomSheet.style.transition = "";
+      var dy = currentY - startY;
+      if (dy > 60) { closeWizard(); } // 60px threshold (forgiving)
+      else { bottomSheet.style.transform = wizardOpen ? "translateY(0)" : "translateY(100%)"; }
+    });
+  })();
 
   function renderWizardStep() {
     var step = wizardSteps[wizardCurrentStep];
@@ -935,11 +984,22 @@ canvas.hidden-canvas { display: none; }
   });
 
   // ==== WebSocket ====
+  var reconnectAttempts = 0;
+  var maxReconnectAttempts = 3;
+  var reconnecting = false;
+
   function connectWebSocket() {
     var url = wsUrlInput.value.trim() || getDefaultWsUrl();
     ws = new WebSocket(url);
     ws.onopen = function() {
       console.log("WebSocket connected");
+      if (reconnecting) {
+        reconnecting = false;
+        reconnectAttempts = 0;
+        setStatus("listening");
+        // Resend current step so agent knows where user was
+        if (wizardOpen && wizardSteps.length > 0) { sendStepChange(); }
+      }
       ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
       ws.send(JSON.stringify({ type: "activity_start" }));
       setStatus("listening");
@@ -948,8 +1008,30 @@ canvas.hidden-canvas { display: none; }
       var msg; try { msg = JSON.parse(ev.data); } catch(e) { return; }
       handleServerMessage(msg);
     };
-    ws.onclose = function() { console.log("WS closed"); if (sessionActive) stopSession(); };
+    ws.onclose = function() {
+      console.log("WS closed");
+      if (sessionActive && reconnectAttempts < maxReconnectAttempts) {
+        attemptReconnect();
+      } else if (sessionActive) {
+        reconnecting = false;
+        reconnectAttempts = 0;
+        stopSession();
+      }
+    };
     ws.onerror = function(e) { console.error("WS error", e); };
+  }
+
+  function attemptReconnect() {
+    reconnecting = true;
+    reconnectAttempts++;
+    setStatus("ready");
+    statusTextEl.textContent = "Reconnecting... (" + reconnectAttempts + "/" + maxReconnectAttempts + ")";
+    statusDot.className = "status-dot orange";
+    console.log("Reconnect attempt " + reconnectAttempts);
+    setTimeout(function() {
+      if (!sessionActive) return;
+      connectWebSocket();
+    }, 2000);
   }
 
   function handleServerMessage(msg) {
@@ -1050,6 +1132,8 @@ canvas.hidden-canvas { display: none; }
 
   function stopSession() {
     sessionActive = false;
+    reconnecting = false;
+    reconnectAttempts = 0;
     startBtn.style.display = "inline-block";
     stopBtn.style.display = "none";
     statusBar.classList.remove("active");
@@ -1057,7 +1141,7 @@ canvas.hidden-canvas { display: none; }
     hideThinking(); stopSpectrumAnim();
     currentAgentTranscriptCard = null;
     closeWizard();
-    wizardSteps = []; youtubeResults = [];
+    // Keep wizardSteps and youtubeResults so old procedure cards remain tappable
     stopFrameCapture(); stopAudioCapture(); stopAllPlayback();
     if (ws) { try { ws.send(JSON.stringify({ type: "activity_end" })); } catch(e){} ws.close(); ws = null; }
     if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
