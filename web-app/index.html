@@ -473,10 +473,10 @@ canvas.hidden-canvas { display: none; }
     </div>
     <div class="header-controls">
       <select id="lang-select" aria-label="Language">
-        <option value="en">English</option>
-        <option value="es">Espa&#241;ol</option>
-        <option value="vi">Ti&#7871;ng Vi&#7879;t</option>
-        <option value="fr">Fran&#231;ais</option>
+        <option value="en">&#127482;&#127480; English</option>
+        <option value="es">&#127466;&#127480; Espa&#241;ol</option>
+        <option value="vi">&#127483;&#127475; Ti&#7871;ng Vi&#7879;t</option>
+        <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
       </select>
       <button class="settings-btn" id="settings-btn" aria-label="Settings">&#9881;</button>
     </div>
@@ -664,9 +664,17 @@ canvas.hidden-canvas { display: none; }
   lightbox.addEventListener("click", function() { lightbox.classList.remove("open"); });
 
   // ==== Language ====
+  var langNames = { en: "English", es: "Spanish", vi: "Vietnamese", fr: "French" };
   langSelect.addEventListener("change", function() {
-    if (ws && ws.readyState === WebSocket.OPEN)
-      ws.send(JSON.stringify({ type: "config", language: langSelect.value }));
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      var code = langSelect.value;
+      var name = langNames[code] || code;
+      ws.send(JSON.stringify({ type: "config", language: code }));
+      // Tell the agent to switch languages mid-conversation
+      if (sessionActive) {
+        ws.send(JSON.stringify({ type: "text", text: "Please respond in " + name + " from now on." }));
+      }
+    }
   });
 
   // ==== Camera ====

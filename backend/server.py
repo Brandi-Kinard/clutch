@@ -53,11 +53,22 @@ def process_request(connection, request):
     return Response(404, "Not Found", Headers(), b"Not Found")
 
 
+LANGUAGE_NAMES = {
+    "en": "English",
+    "es": "Spanish",
+    "vi": "Vietnamese",
+    "fr": "French",
+}
+
+
 async def handle_client(websocket):
     """Handle a single WebSocket client connection with ADK live streaming."""
     user_id = f"user-{uuid.uuid4().hex[:8]}"
     session_id = f"session-{uuid.uuid4().hex[:8]}"
     logger.info("Client connected: user=%s session=%s", user_id, session_id)
+
+    # Per-session language preference
+    session_language = "en"
 
     # Create session
     session = await session_service.create_session(
@@ -134,6 +145,10 @@ async def handle_client(websocket):
 
             elif msg_type == "config":
                 # Language preference or other session config from frontend
+                if "language" in data:
+                    session_language = data["language"]
+                    lang_name = LANGUAGE_NAMES.get(session_language, session_language)
+                    logger.info("Language set to: %s (%s)", session_language, lang_name)
                 logger.info("Config update: %s", data)
 
             elif msg_type == "step_change":
