@@ -381,6 +381,23 @@ main {
 }
 .step-tools strong { color: var(--text-primary); }
 
+.step-image-wrap {
+  width: 100%; max-width: 300px;
+  margin-bottom: 12px; position: relative;
+}
+.step-image-wrap img {
+  width: 100%; border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+.step-image-wrap .ai-badge {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: #fff;
+  font-size: 10px; font-weight: 600;
+  padding: 3px 7px; border-radius: 6px;
+  pointer-events: none;
+}
+
 /* Completion screen */
 .completion-screen { text-align: center; padding: 20px 0; }
 .completion-screen .done-icon { font-size: 48px; margin-bottom: 12px; }
@@ -581,6 +598,7 @@ canvas.hidden-canvas { display: none; }
   var wizardCurrentStep = 0; // 0-indexed
   var wizardOpen = false;
   var youtubeResults = [];
+  var wizardImages = {}; // keyed by image_search_query or step index
 
   // ==== DOM refs ====
   var startBtn = document.getElementById("start-btn");
@@ -913,12 +931,33 @@ canvas.hidden-canvas { display: none; }
     var pct = ((wizardCurrentStep + 1) / total) * 100;
     sheetProgressBar.style.width = pct + "%";
 
+    // Find image for this step (by image_search_query key or step index)
+    var imgKey = step.image_search_query || ("step_" + wizardCurrentStep);
+    var imgData = wizardImages[imgKey] || wizardImages["step_" + wizardCurrentStep];
+    var imgHtml = "";
+    if (imgData) {
+      imgHtml = '<div class="step-image-wrap">' +
+        '<img src="' + escapeAttr(imgData.image_url) + '" alt="' + escapeAttr(imgData.title || "") + '">' +
+        (imgData.ai_generated ? '<div class="ai-badge">AI-generated</div>' : '') +
+        '</div>';
+    }
+
     sheetBody.innerHTML =
       '<div class="step-circle">' + (step.number || (wizardCurrentStep + 1)) + '</div>' +
       '<div class="step-label-text">Step ' + (step.number || (wizardCurrentStep + 1)) + ' of ' + total + '</div>' +
+      imgHtml +
       '<div class="step-instruction">' + escapeHtml(step.instruction || "") + '</div>' +
       (step.tools_needed && step.tools_needed.length ?
         '<div class="step-tools"><strong>Tools:</strong> ' + escapeHtml(step.tools_needed.join(", ")) + '</div>' : '');
+
+    // Wire up image tap -> lightbox
+    var stepImg = sheetBody.querySelector(".step-image-wrap img");
+    if (stepImg) {
+      stepImg.addEventListener("click", function() {
+        lightboxImg.src = this.src;
+        lightbox.classList.add("open");
+      });
+    }
 
     sheetBack.disabled = wizardCurrentStep === 0;
     if (wizardCurrentStep === total - 1) {
@@ -1127,7 +1166,33 @@ canvas.hidden-canvas { display: none; }
       console.warn("search_youtube returned unexpected result:", result);
     }
 
-    // search_images returns empty now, nothing to do
+    if (tool === "search_images" && result && Array.isArray(result) && result.length > 0) {
+      // Store images keyed by the query (title contains the query)
+      result.forEach(function(img) {
+        if (img.image_url) {
+          // Extract query from title "AI-generated: <query>"
+          var q = (img.title || "").replace(/^AI-generated:\s*/, "");
+          // Also try to match against step image_search_query fields
+          var matched = false;
+          wizardSteps.forEach(function(step, idx) {
+            if (step.image_search_query && step.image_search_query === q) {
+              wizardImages[step.image_search_query] = img;
+              matched = true;
+            }
+          });
+          if (!matched) {
+            // Fallback: assign to first step without an image
+            for (var si = 0; si < wizardSteps.length; si++) {
+              var k = wizardSteps[si].image_search_query || ("step_" + si);
+              if (!wizardImages[k]) { wizardImages[k] = img; break; }
+            }
+          }
+          console.log("Stored image for query:", q);
+        }
+      });
+      // Re-render current step if wizard is open (image may have just arrived)
+      if (wizardOpen) renderWizardStep();
+    }
   }
 
   // ==== Session Control ====
