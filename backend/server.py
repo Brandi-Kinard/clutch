@@ -37,7 +37,7 @@ HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "web-app", "index.html
 
 def process_request(connection, request):
     """Serve index.html for HTTP GET /; pass through WebSocket upgrades."""
-    if request.headers.get("Upgrade", "").lower() == "websocket":
+    if request.headers.get("Upgrade", "").lower() == "websocket" or request.path == "/ws":
         return None  # let the WebSocket handshake proceed
     if request.path == "/" or request.path == "/index.html":
         try:
