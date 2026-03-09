@@ -21,37 +21,37 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Surfaces ── */
-  --surface:            #ffffff;
-  --surface-dim:        #f8f9fa;
-  --surface-container:  #f1f3f4;
-  --surface-variant:    #e8eaed;
+  /* ── Surfaces (dark) ── */
+  --surface:            #1a1a1d;
+  --surface-dim:        #131316;
+  --surface-container:  #252529;
+  --surface-variant:    #35353a;
 
   /* ── On-surface ── */
-  --on-surface:         #1f1f1f;
-  --on-surface-variant: #5f6368;
-  --outline:            #dadce0;
+  --on-surface:         #e8e8ed;
+  --on-surface-variant: #9e9ea6;
+  --outline:            #3a3a42;
 
-  /* ── Primary ── */
-  --primary:            #7c3aed;
-  --on-primary:         #ffffff;
+  /* ── Primary (lighter violet for dark bg) ── */
+  --primary:            #a78bfa;
+  --on-primary:         #1a0533;
 
   /* ── Semantic ── */
-  --error:              #d93025;
-  --on-error:           #ffffff;
-  --success:            #34a853;
+  --error:              #fca5a5;
+  --on-error:           #7f1d1d;
+  --success:            #6ee7b7;
 
   /* ── Header ── */
-  --header-bg:          #131314;
+  --header-bg:          #0e0e11;
 
-  /* ── Signature gradient: deep indigo → electric violet → near-white ── */
-  --gradient:           linear-gradient(135deg, #1a0533 0%, #7c3aed 55%, #e0d4ff 100%);
-  --gradient-subtle:    linear-gradient(135deg, rgba(26,5,51,0.08), rgba(124,58,237,0.07));
+  /* ── Dark violet gradient ── */
+  --gradient:           linear-gradient(135deg, #2e1065 0%, #7c3aed 50%, #c4b5fd 100%);
+  --gradient-subtle:    linear-gradient(135deg, rgba(46,16,101,0.30), rgba(167,139,250,0.12));
 
-  /* ── Elevation (M3) ── */
-  --shadow-1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-2: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-3: 0 2px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.10);
+  /* ── Elevation (M3 — more visible on dark) ── */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-2: 0 2px 6px rgba(0,0,0,0.40), 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-3: 0 4px 8px rgba(0,0,0,0.40), 0 8px 24px rgba(0,0,0,0.45);
 
   /* ── Shape ── */
   --radius-sm:   8px;
@@ -109,16 +109,16 @@ header .tagline {
   color: var(--on-surface);
   border: none;
   border-radius: var(--radius-full);
-  padding: 0 16px;
+  padding: 0 14px;
   font-size: 13px;
   font-family: var(--font);
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
   height: 44px;
-  min-width: 140px;
+  width: auto;
 }
-#lang-select option { color: #000; background: #fff; }
+#lang-select option { color: var(--on-surface); background: var(--surface-container); }
 .settings-btn {
   background: none;
   border: none;
@@ -138,7 +138,7 @@ header .tagline {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.48);
+  background: rgba(0,0,0,0.70);
   z-index: 100;
   align-items: center;
   justify-content: center;
@@ -325,10 +325,11 @@ main {
 }
 .chat-card.agent-msg .bubble-label { color: var(--primary); }
 
-/* ── User bubble: subtle blue tint, rounded ── */
+/* ── User bubble: dark surface with subtle violet left border ── */
 .chat-card.user-bubble {
-  background: #e8f0fe;
+  background: #2a2a30;
   border-radius: var(--radius-xl);
+  border-left: 2px solid rgba(167,139,250,0.45);
   box-shadow: none;
   margin-left: auto;
 }
@@ -336,11 +337,12 @@ main {
 
 /* ── Safety warning ── */
 .chat-card.safety-warning {
-  background: #fff8e1;
+  background: rgba(251,191,36,0.10);
+  border-left: 2px solid rgba(251,191,36,0.50);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
 }
-.chat-card.safety-warning .bubble-label { color: #e37400; }
+.chat-card.safety-warning .bubble-label { color: #fbbf24; }
 
 /* ── Spectrum visualiser — waveform, grows both up and down from center ── */
 .chat-card .spectrum-viz {
@@ -423,9 +425,9 @@ main {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(124,58,237,0.07) 30%,
-    rgba(167,139,250,0.09) 50%,
-    rgba(224,212,255,0.07) 70%,
+    rgba(167,139,250,0.14) 30%,
+    rgba(196,181,253,0.20) 50%,
+    rgba(167,139,250,0.14) 70%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -484,7 +486,7 @@ main {
   right: 0;
   padding: 10px 16px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, var(--surface) 24%);
+  background: linear-gradient(transparent, var(--surface-dim) 20%, var(--surface-dim));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -566,42 +568,24 @@ main {
 }
 #start-btn:active { transform: scale(0.96); box-shadow: var(--shadow-1); }
 
-/* Stop button in toolbar */
+/* Stop button in toolbar — pill with icon + text */
 .toolbar-btn-stop {
-  background: var(--header-bg);
-  color: #fff;
-  position: relative;
+  background: var(--surface-variant);
+  color: var(--on-surface);
+  width: auto;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  gap: 6px;
 }
-.toolbar-btn-stop:active { background: #2d2d2e; }
-.toolbar-btn-stop .listening-bars {
-  display: none;
-  align-items: center;
-  gap: 2px;
-  height: 18px;
-}
-.toolbar-btn-stop .listening-bars span {
-  width: 3px;
-  background: #fff;
-  border-radius: 1.5px;
-  height: 14px;
-  animation: listening-wave 0.8s ease-in-out infinite;
-}
-.toolbar-btn-stop .listening-bars span:nth-child(2) { animation-delay: 0.15s; }
-.toolbar-btn-stop .listening-bars span:nth-child(3) { animation-delay: 0.30s; }
-.toolbar-btn-stop .listening-bars span:nth-child(4) { animation-delay: 0.45s; }
-.toolbar-btn-stop.listening .listening-bars { display: flex; }
-.toolbar-btn-stop.listening .material-symbols-outlined { display: none; }
-@keyframes listening-wave {
-  0%, 100% { transform: scaleY(0.3); }
-  50%       { transform: scaleY(1); }
-}
+.toolbar-btn-stop:active { background: var(--outline); }
+.stop-label { font-size: 13px; font-weight: 500; }
 
 
 /* ════ SHEET OVERLAY ════ */
 .sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.38);
+  background: rgba(0,0,0,0.60);
   z-index: 50;
   opacity: 0;
   pointer-events: none;
@@ -650,22 +634,47 @@ main {
   position: absolute;
   right: 14px;
   top: 8px;
-  background: none;
+  background: var(--surface-container);
   border: none;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: var(--font);
-  color: var(--on-surface-variant);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
   cursor: pointer;
-  padding: 6px 10px;
-  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  color: var(--on-surface-variant);
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
-.sheet-close-btn:active { background: var(--surface-container); }
+.sheet-close-btn:active { background: var(--surface-variant); }
+
+/* Camera minimize overlay button */
+#cam-minimize-btn {
+  display: none;
+  position: fixed;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 26;
+}
+#cam-minimize-btn button {
+  background: rgba(0,0,0,0.62);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #fff;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-family: var(--font);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 
 /* Progress bar */
 .sheet-progress {
@@ -882,14 +891,14 @@ main {
   box-shadow: var(--shadow-1);
 }
 .nav-circle-btn.btn-next:active { box-shadow: none; }
-.nav-circle-btn.btn-next.done { background: var(--success); }
+.nav-circle-btn.btn-next.done { background: var(--success); color: #064e3b; }
 
 
 /* ════ YOUTUBE ARTIFACT SHEET ════ */
 .yt-sheet-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.40);
+  background: rgba(0,0,0,0.65);
   z-index: 90;
   opacity: 0;
   pointer-events: none;
@@ -1068,7 +1077,7 @@ main {
 .face-btn:active { transform: scale(0.88); }
 .face-btn.selected {
   border-color: var(--primary);
-  background: rgba(124,58,237,0.10);
+  background: rgba(167,139,250,0.18);
   transform: scale(1.15);
 }
 .feedback-thanks {
@@ -1158,35 +1167,7 @@ canvas.hidden-canvas { display: none; }
   <div class="chat-area" id="chat-area">
     <div class="empty-state" id="empty-state">
       <div class="empty-icon" id="empty-icon">
-        <svg width="160" height="120" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Smart glasses -->
-          <ellipse cx="52" cy="32" rx="26" ry="19" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
-          <ellipse cx="108" cy="32" rx="26" ry="19" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
-          <path d="M78 32 L82 32" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M26 32 L10 38" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
-          <path d="M134 32 L150 38" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
-          <!-- Lens fill -->
-          <ellipse cx="52" cy="30" rx="16" ry="11" fill="#7c3aed" fill-opacity="0.10"/>
-          <ellipse cx="108" cy="30" rx="16" ry="11" fill="#7c3aed" fill-opacity="0.10"/>
-          <!-- Lens glint -->
-          <ellipse cx="44" cy="26" rx="5" ry="3.5" fill="#7c3aed" fill-opacity="0.22"/>
-          <ellipse cx="100" cy="26" rx="5" ry="3.5" fill="#7c3aed" fill-opacity="0.22"/>
-          <!-- Connecting arcs to tools -->
-          <path d="M52 51 C52 64 30 68 30 82" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.45" stroke-linecap="round"/>
-          <path d="M108 51 C108 64 126 68 126 82" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.45" stroke-linecap="round"/>
-          <!-- Center glow dot -->
-          <circle cx="80" cy="60" r="5" fill="#7c3aed" fill-opacity="0.18"/>
-          <circle cx="80" cy="60" r="2.5" fill="#7c3aed" opacity="0.55"/>
-          <!-- Phone (lower left) -->
-          <rect x="14" y="80" width="30" height="38" rx="5" stroke="#7c3aed" stroke-width="2" fill="none"/>
-          <rect x="19" y="86" width="20" height="24" rx="2" fill="#7c3aed" fill-opacity="0.12"/>
-          <circle cx="29" cy="115" r="2.5" fill="#7c3aed" fill-opacity="0.45"/>
-          <!-- Wrench (lower right) -->
-          <circle cx="126" cy="87" r="11" stroke="#7c3aed" stroke-width="2" fill="none"/>
-          <circle cx="126" cy="87" r="4.5" fill="#7c3aed" fill-opacity="0.18"/>
-          <path d="M126 98 L126 116" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
-          <path d="M121 98 L131 98" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+        <span class="material-symbols-outlined" style="font-size:64px;color:var(--primary)">view_in_ar</span>
       </div>
       <p>Point your camera at whatever you need help with,<br>then tap <strong>Session</strong>.</p>
     </div>
@@ -1215,10 +1196,11 @@ canvas.hidden-canvas { display: none; }
         <option value="es">🇪🇸 ES</option>
         <option value="vi">🇻🇳 VI</option>
         <option value="fr">🇫🇷 FR</option>
+        <option value="zh">🇨🇳 ZH</option>
       </select>
       <button class="toolbar-btn toolbar-btn-stop" id="stop-btn" title="Stop session">
         <span class="material-symbols-outlined">stop</span>
-        <span class="listening-bars"><span></span><span></span><span></span><span></span></span>
+        <span class="stop-label">Stop</span>
       </button>
     </div>
   </div>
@@ -1232,7 +1214,7 @@ canvas.hidden-canvas { display: none; }
 <div class="bottom-sheet" id="bottom-sheet">
   <div class="sheet-header" id="sheet-header">
     <div class="pill"></div>
-    <button class="sheet-close-btn" id="sheet-close-btn">&#10005; Close</button>
+    <button class="sheet-close-btn" id="sheet-close-btn">&#10005;</button>
   </div>
   <div class="sheet-progress"><div class="bar" id="sheet-progress-bar"></div></div>
   <div class="sheet-body" id="sheet-body"></div>
@@ -1255,6 +1237,14 @@ canvas.hidden-canvas { display: none; }
     <button class="yt-sheet-close" id="yt-sheet-close">&#10005;</button>
   </div>
   <div class="yt-sheet-body" id="yt-sheet-body"></div>
+</div>
+
+<!-- Camera minimize overlay (shown when camera is expanded) -->
+<div id="cam-minimize-btn">
+  <button>
+    <span class="material-symbols-outlined" style="font-size:16px">close_fullscreen</span>
+    Minimize
+  </button>
 </div>
 
 <!-- Hidden canvas for frame capture -->
@@ -1281,6 +1271,10 @@ canvas.hidden-canvas { display: none; }
   var spectrumAnimFrame = null;
   var activeSpectrumBars = null;
   var thinkingDebounceTimer = null;
+
+  // Camera drag/expand state
+  var camX = 0, camY = 72;
+  var camExpanded = false;
 
   // Wizard state
   var wizardSteps = [];
@@ -1367,9 +1361,6 @@ canvas.hidden-canvas { display: none; }
     }
     statusDot.className = dotClass;
     statusTextEl.textContent = txt;
-    // Animate stop button when listening
-    var stopBtnEl = document.getElementById("stop-btn");
-    if (stopBtnEl) stopBtnEl.classList.toggle("listening", s === "listening");
   }
 
   // ==== Settings Modal ====
@@ -1391,7 +1382,8 @@ canvas.hidden-canvas { display: none; }
     en: "LANGUAGE SWITCH: Speak only in English from now on. Confirm by saying 'Got it, switching to English.'",
     es: "LANGUAGE SWITCH: From now on, speak ONLY in Spanish. Every single word must be in Spanish. Confirm by saying 'Entendido, ahora hablo en espa\u00f1ol.'",
     vi: "LANGUAGE SWITCH: From now on, speak ONLY in Vietnamese. Every single word must be in Vietnamese. Confirm by saying '\u0110\u01b0\u1ee3c r\u1ed3i, b\u00e2y gi\u1edd t\u00f4i n\u00f3i ti\u1ebfng Vi\u1ec7t.'",
-    fr: "LANGUAGE SWITCH: From now on, speak ONLY in French. Every single word must be in French. Confirm by saying 'Compris, je parle maintenant en fran\u00e7ais.'"
+    fr: "LANGUAGE SWITCH: From now on, speak ONLY in French. Every single word must be in French. Confirm by saying 'Compris, je parle maintenant en fran\u00e7ais.'",
+    zh: "LANGUAGE SWITCH: From now on, speak ONLY in Mandarin Chinese. Every word must be in Mandarin. Confirm by saying '\u597d\u7684\uff0c\u6211\u73b0\u5728\u8bf4\u4e2d\u6587\u3002'"
   };
   langSelect.addEventListener("change", function() {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -1530,6 +1522,92 @@ canvas.hidden-canvas { display: none; }
     activeSpectrumBars = null;
     if (spectrumAnimFrame) { cancelAnimationFrame(spectrumAnimFrame); spectrumAnimFrame = null; }
   }
+
+  // ==== Camera Drag + Expand ====
+  function initCamDrag() {
+    camX = window.innerWidth - 192; // right:12, width:180
+    camY = 72;
+    camExpanded = false;
+    var camMinBtn = document.getElementById("cam-minimize-btn");
+    if (camMinBtn) camMinBtn.style.display = "none";
+    cameraPreview.style.right = "auto";
+    cameraPreview.style.left = camX + "px";
+    cameraPreview.style.top = camY + "px";
+    cameraPreview.style.width = "180px";
+    cameraPreview.style.height = "135px";
+    cameraPreview.style.borderRadius = "var(--radius-lg)";
+    cameraPreview.style.zIndex = "20";
+  }
+  function collapseCamPreview() {
+    if (!camExpanded) return;
+    camExpanded = false;
+    var camMinBtn = document.getElementById("cam-minimize-btn");
+    if (camMinBtn) camMinBtn.style.display = "none";
+    cameraPreview.style.right = "auto";
+    cameraPreview.style.left = camX + "px";
+    cameraPreview.style.top = camY + "px";
+    cameraPreview.style.width = "180px";
+    cameraPreview.style.height = "135px";
+    cameraPreview.style.borderRadius = "var(--radius-lg)";
+    cameraPreview.style.zIndex = "20";
+  }
+  (function() {
+    var isDragging = false;
+    var dragStartX = 0, dragStartY = 0;
+    var camStartX = 0, camStartY = 0;
+    var touchMoved = false;
+    var camMinBtn = document.getElementById("cam-minimize-btn");
+
+    function expandCam() {
+      camExpanded = true;
+      cameraPreview.style.right = "auto";
+      cameraPreview.style.left = "12px";
+      cameraPreview.style.top = "70px";
+      cameraPreview.style.width = (window.innerWidth - 24) + "px";
+      cameraPreview.style.height = (window.innerHeight - 160) + "px";
+      cameraPreview.style.borderRadius = "16px";
+      cameraPreview.style.zIndex = "25";
+      if (camMinBtn) camMinBtn.style.display = "block";
+    }
+
+    cameraPreview.addEventListener("touchstart", function(e) {
+      if (!cameraPreview.classList.contains("session-preview")) return;
+      if (camExpanded) return;
+      dragStartX = e.touches[0].clientX;
+      dragStartY = e.touches[0].clientY;
+      camStartX = camX;
+      camStartY = camY;
+      isDragging = true;
+      touchMoved = false;
+      e.preventDefault();
+    }, { passive: false });
+
+    cameraPreview.addEventListener("touchmove", function(e) {
+      if (!isDragging) return;
+      var dx = e.touches[0].clientX - dragStartX;
+      var dy = e.touches[0].clientY - dragStartY;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) touchMoved = true;
+      if (!touchMoved) return;
+      camX = Math.max(0, Math.min(window.innerWidth - 180, camStartX + dx));
+      camY = Math.max(0, Math.min(window.innerHeight - 135, camStartY + dy));
+      cameraPreview.style.left = camX + "px";
+      cameraPreview.style.top = camY + "px";
+      e.preventDefault();
+    }, { passive: false });
+
+    cameraPreview.addEventListener("touchend", function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!touchMoved) {
+        if (camExpanded) collapseCamPreview();
+        else expandCam();
+      }
+    }, { passive: false });
+
+    if (camMinBtn) {
+      camMinBtn.addEventListener("click", function() { collapseCamPreview(); });
+    }
+  })();
 
   // ==== Agent Transcript (spectrum -> text) ====
   function showAgentTranscript(text, partial) {
@@ -2021,6 +2099,7 @@ canvas.hidden-canvas { display: none; }
     startBtn.style.display = "none";
     document.getElementById("session-controls").style.display = "flex";
     cameraPreview.classList.add("session-preview");
+    initCamDrag();
     // Update empty state to "Start talking"
     if (emptyState) {
       var iconEl = emptyState.querySelector("#empty-icon");
@@ -2051,7 +2130,9 @@ canvas.hidden-canvas { display: none; }
     isMicMuted = false; isCamOff = false;
     if (muteBtn) { muteBtn.querySelector(".material-symbols-outlined").textContent = "mic"; muteBtn.classList.remove("toolbar-btn-active"); }
     if (camBtn) { camBtn.querySelector(".material-symbols-outlined").textContent = "videocam"; camBtn.classList.remove("toolbar-btn-active"); }
+    collapseCamPreview();
     cameraPreview.classList.remove("session-preview");
+    cameraPreview.style.cssText = "";
     hideThinking(); stopSpectrumAnim();
     currentAgentTranscriptCard = null;
     closeWizard();
