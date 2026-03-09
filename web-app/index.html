@@ -33,7 +33,7 @@
   --outline:            #dadce0;
 
   /* ── Primary ── */
-  --primary:            #1a73e8;
+  --primary:            #7c3aed;
   --on-primary:         #ffffff;
 
   /* ── Semantic ── */
@@ -44,9 +44,9 @@
   /* ── Header ── */
   --header-bg:          #131314;
 
-  /* ── Gemini gradient: blue → indigo (NOT rainbow) ── */
-  --gradient:           linear-gradient(135deg, #4285f4 0%, #5e5ce6 55%, #8b5cf6 100%);
-  --gradient-subtle:    linear-gradient(135deg, rgba(66,133,244,0.10), rgba(139,92,246,0.07));
+  /* ── Signature gradient: deep indigo → electric violet → near-white ── */
+  --gradient:           linear-gradient(135deg, #1a0533 0%, #7c3aed 55%, #e0d4ff 100%);
+  --gradient-subtle:    linear-gradient(135deg, rgba(26,5,51,0.08), rgba(124,58,237,0.07));
 
   /* ── Elevation (M3) ── */
   --shadow-1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.06);
@@ -109,14 +109,14 @@ header .tagline {
   color: var(--on-surface);
   border: none;
   border-radius: var(--radius-full);
-  padding: 0 14px;
+  padding: 0 16px;
   font-size: 13px;
   font-family: var(--font);
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
   height: 44px;
-  min-width: 70px;
+  min-width: 140px;
 }
 #lang-select option { color: #000; background: #fff; }
 .settings-btn {
@@ -216,8 +216,8 @@ main {
 #camera-preview { display: none; }
 #camera-preview.session-preview {
   display: block;
-  width: 100px;
-  height: 75px;
+  width: 180px;
+  height: 135px;
   border-radius: var(--radius-lg);
   position: fixed;
   top: 72px;
@@ -229,18 +229,20 @@ main {
 }
 
 
-/* ════ STATUS BAR ════ */
-.status-bar {
+/* ════ HEADER STATUS (inline in header) ════ */
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.header-status {
   display: none;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 7px 16px;
-  background: var(--gradient-subtle);
-  flex-shrink: 0;
-  border-bottom: 1px solid rgba(66,133,244,0.10);
+  gap: 6px;
 }
-.status-bar.active { display: flex; }
+.header-status.active { display: flex; }
+.header-status .status-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.01em;
+}
 
 .status-dot {
   width: 7px;
@@ -250,19 +252,12 @@ main {
 }
 .status-dot.green  { background: var(--success); animation: pulse 1.5s ease-in-out infinite; }
 .status-dot.orange { background: #f9ab00;        animation: pulse 1.0s ease-in-out infinite; }
-.status-dot.blue   { background: var(--primary); animation: pulse 1.0s ease-in-out infinite; }
-.status-dot.gray   { background: var(--on-surface-variant); }
+.status-dot.blue   { background: #a78bfa;        animation: pulse 1.0s ease-in-out infinite; }
+.status-dot.gray   { background: rgba(255,255,255,0.35); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.35; transform: scale(0.65); }
-}
-
-.status-bar .status-text {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--on-surface-variant);
-  letter-spacing: 0.01em;
 }
 
 
@@ -273,6 +268,8 @@ main {
   -webkit-overflow-scrolling: touch;
   padding: 16px 16px 110px;
   background: var(--surface);
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Shared card anatomy ── */
@@ -426,9 +423,9 @@ main {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(66,133,244,0.07) 30%,
-    rgba(94,92,230,0.09) 50%,
-    rgba(139,92,246,0.07) 70%,
+    rgba(124,58,237,0.07) 30%,
+    rgba(167,139,250,0.09) 50%,
+    rgba(224,212,255,0.07) 70%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -466,12 +463,17 @@ main {
 
 /* ════ EMPTY STATE ════ */
 .empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 48px 24px;
+  padding: 40px 32px;
   color: var(--on-surface-variant);
 }
 .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
-.empty-state p { font-size: 15px; line-height: 1.6; }
+.empty-state p { font-size: 17px; line-height: 1.6; }
 
 
 /* ════ CONTROLS ════ */
@@ -522,7 +524,7 @@ main {
 }
 .toolbar-btn:active { background: var(--surface-variant); }
 .toolbar-btn.toolbar-btn-active {
-  background: rgba(26,115,232,0.12);
+  background: rgba(124,58,237,0.12);
   color: var(--primary);
 }
 
@@ -544,34 +546,55 @@ main {
   justify-content: center;
   align-items: center;
 }
-#start-btn, #stop-btn {
+#start-btn {
   border: none;
   border-radius: var(--radius-full);
   font-size: 16px;
   font-weight: 500;
   font-family: var(--font);
-  padding: 15px 48px;
+  padding: 15px 36px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
   letter-spacing: 0.01em;
-}
-#start-btn {
   background: var(--primary);
   color: var(--on-primary);
   box-shadow: var(--shadow-2);
-}
-#start-btn:active  { transform: scale(0.96); box-shadow: var(--shadow-1); }
-#stop-btn {
-  background: var(--header-bg);
-  color: #ffffff;
-  box-shadow: var(--shadow-2);
-  display: none;
-  gap: 6px;
+  display: flex;
   align-items: center;
-  padding: 15px 36px;
+  gap: 8px;
 }
-#stop-btn:active { transform: scale(0.96); box-shadow: var(--shadow-1); }
+#start-btn:active { transform: scale(0.96); box-shadow: var(--shadow-1); }
+
+/* Stop button in toolbar */
+.toolbar-btn-stop {
+  background: var(--header-bg);
+  color: #fff;
+  position: relative;
+}
+.toolbar-btn-stop:active { background: #2d2d2e; }
+.toolbar-btn-stop .listening-bars {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  height: 18px;
+}
+.toolbar-btn-stop .listening-bars span {
+  width: 3px;
+  background: #fff;
+  border-radius: 1.5px;
+  height: 14px;
+  animation: listening-wave 0.8s ease-in-out infinite;
+}
+.toolbar-btn-stop .listening-bars span:nth-child(2) { animation-delay: 0.15s; }
+.toolbar-btn-stop .listening-bars span:nth-child(3) { animation-delay: 0.30s; }
+.toolbar-btn-stop .listening-bars span:nth-child(4) { animation-delay: 0.45s; }
+.toolbar-btn-stop.listening .listening-bars { display: flex; }
+.toolbar-btn-stop.listening .material-symbols-outlined { display: none; }
+@keyframes listening-wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
+}
 
 
 /* ════ SHEET OVERLAY ════ */
@@ -685,7 +708,7 @@ main {
   justify-content: center;
   margin-bottom: 14px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(26,115,232,0.22);
+  box-shadow: 0 2px 8px rgba(124,58,237,0.22);
 }
 
 .step-label-text {
@@ -830,35 +853,36 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding: 14px 28px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--outline);
   background: var(--surface);
 }
-.sheet-nav button {
+.nav-circle-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   border: none;
-  border-radius: var(--radius-full);
-  font-size: 15px;
-  font-weight: 500;
-  font-family: var(--font);
-  padding: 11px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.12s, box-shadow 0.12s;
+  transition: transform 0.12s, background 0.15s, box-shadow 0.12s;
 }
-.sheet-nav button:active { transform: scale(0.95); }
-.sheet-nav .btn-back {
+.nav-circle-btn:active { transform: scale(0.92); }
+.nav-circle-btn.btn-back {
   background: var(--surface-container);
   color: var(--on-surface);
 }
-.sheet-nav .btn-back:disabled { opacity: 0.32; }
-.sheet-nav .btn-next {
+.nav-circle-btn.btn-back:disabled { opacity: 0.32; }
+.nav-circle-btn.btn-next {
   background: var(--primary);
   color: var(--on-primary);
   box-shadow: var(--shadow-1);
 }
-.sheet-nav .btn-next:active { box-shadow: none; }
-.sheet-nav .btn-next.done { background: var(--success); }
+.nav-circle-btn.btn-next:active { box-shadow: none; }
+.nav-circle-btn.btn-next.done { background: var(--success); }
 
 
 /* ════ YOUTUBE ARTIFACT SHEET ════ */
@@ -1026,34 +1050,30 @@ main {
   color: var(--on-surface-variant);
   font-weight: 500;
 }
-.feedback-thumbs { display: flex; gap: 16px; }
-.feedback-thumbs button {
-  border: 2px solid var(--outline);
-  background: var(--surface);
+.feedback-faces { display: flex; gap: 8px; }
+.face-btn {
+  border: 2px solid transparent;
+  background: var(--surface-container);
   border-radius: 50%;
-  width: 56px;
-  height: 56px;
-  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  font-size: 22px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
-.feedback-thumbs button:active { transform: scale(0.90); }
-.feedback-thumbs button.selected-up {
-  border-color: var(--success);
-  background: rgba(52,168,83,0.08);
-  transform: scale(1.12);
-}
-.feedback-thumbs button.selected-down {
-  border-color: var(--error);
-  background: rgba(217,48,37,0.08);
-  transform: scale(1.12);
+.face-btn:active { transform: scale(0.88); }
+.face-btn.selected {
+  border-color: var(--primary);
+  background: rgba(124,58,237,0.10);
+  transform: scale(1.15);
 }
 .feedback-thanks {
   font-size: 13px;
-  color: var(--success);
+  color: var(--on-surface-variant);
   font-weight: 500;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -1092,74 +1112,18 @@ canvas.hidden-canvas { display: none; }
 }
 
 
-/* ---- CONFETTI ---- */
-.confetti-container {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none; z-index: 200; overflow: hidden;
-}
-.confetti-piece {
-  position: absolute; top: -20px;
-  width: 10px; height: 10px;
-  animation: confetti-fall 3s ease-out forwards;
-}
-@keyframes confetti-fall {
-  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg) scale(0.3); opacity: 0; }
-}
-
-/* ---- FEEDBACK WIDGET ---- */
-.feedback-widget {
-  display: flex; flex-direction: column; align-items: center;
-  margin-top: 20px; gap: 12px;
-}
-.feedback-label {
-  font-size: 14px; color: var(--text-secondary); font-weight: 500;
-}
-.feedback-thumbs {
-  display: flex; gap: 16px;
-}
-.feedback-thumbs button {
-  border: 2px solid #e8eaed; background: #fff;
-  border-radius: 50%; width: 56px; height: 56px;
-  font-size: 24px; cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex; align-items: center; justify-content: center;
-}
-.feedback-thumbs button:active { transform: scale(0.9); }
-.feedback-thumbs button.selected-up {
-  border-color: var(--accent-green); background: rgba(52,168,83,0.1);
-  transform: scale(1.15);
-}
-.feedback-thumbs button.selected-down {
-  border-color: var(--accent-red); background: rgba(234,67,53,0.1);
-  transform: scale(1.15);
-}
-.feedback-thanks {
-  font-size: 13px; color: var(--accent-green); font-weight: 600;
-  opacity: 0; transition: opacity 0.3s ease;
-  height: 20px;
-}
-.feedback-thanks.show { opacity: 1; }
-
-/* ---- LIGHTBOX ---- */
-.lightbox {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85); z-index: 200;
-  align-items: center; justify-content: center; cursor: pointer;
-}
-.lightbox.open { display: flex; }
-.lightbox img { max-width: 95%; max-height: 90%; border-radius: 8px; }
-
-/* ---- HIDDEN ---- */
-canvas.hidden-canvas { display: none; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="top-row">
-    <div>
-      <h1><span class="material-symbols-outlined" style="font-size:22px;vertical-align:middle;margin-right:6px">construction</span>Clutch</h1>
+    <div class="header-brand">
+      <h1>Clutch</h1>
+      <div class="header-status" id="header-status">
+        <div class="status-dot gray" id="status-dot"></div>
+        <span class="status-text" id="status-text"></span>
+      </div>
     </div>
     <div class="header-controls">
       <button class="settings-btn" id="settings-btn" aria-label="Settings">&#9881;</button>
@@ -1190,24 +1154,41 @@ canvas.hidden-canvas { display: none; }
     <video id="camera-preview" autoplay playsinline muted></video>
   </div>
 
-  <div class="status-bar" id="status-bar">
-    <div class="status-dot green" id="status-dot"></div>
-    <span class="status-text" id="status-text">Ready</span>
-  </div>
-
   <!-- LAYER 1: Chat area -->
   <div class="chat-area" id="chat-area">
     <div class="empty-state" id="empty-state">
       <div class="empty-icon" id="empty-icon">
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="8" y="22" width="64" height="44" rx="8" stroke="#1a73e8" stroke-width="2.5" fill="none"/>
-          <circle cx="40" cy="44" r="13" stroke="#1a73e8" stroke-width="2.5" fill="none"/>
-          <circle cx="40" cy="44" r="5.5" fill="#1a73e8" fill-opacity="0.22"/>
-          <path d="M29 22 L33 14 L47 14 L51 22" stroke="#1a73e8" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
-          <circle cx="63" cy="31" r="2.5" fill="#1a73e8" fill-opacity="0.5"/>
+        <svg width="160" height="120" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Smart glasses -->
+          <ellipse cx="52" cy="32" rx="26" ry="19" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+          <ellipse cx="108" cy="32" rx="26" ry="19" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+          <path d="M78 32 L82 32" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M26 32 L10 38" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+          <path d="M134 32 L150 38" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+          <!-- Lens fill -->
+          <ellipse cx="52" cy="30" rx="16" ry="11" fill="#7c3aed" fill-opacity="0.10"/>
+          <ellipse cx="108" cy="30" rx="16" ry="11" fill="#7c3aed" fill-opacity="0.10"/>
+          <!-- Lens glint -->
+          <ellipse cx="44" cy="26" rx="5" ry="3.5" fill="#7c3aed" fill-opacity="0.22"/>
+          <ellipse cx="100" cy="26" rx="5" ry="3.5" fill="#7c3aed" fill-opacity="0.22"/>
+          <!-- Connecting arcs to tools -->
+          <path d="M52 51 C52 64 30 68 30 82" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.45" stroke-linecap="round"/>
+          <path d="M108 51 C108 64 126 68 126 82" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.45" stroke-linecap="round"/>
+          <!-- Center glow dot -->
+          <circle cx="80" cy="60" r="5" fill="#7c3aed" fill-opacity="0.18"/>
+          <circle cx="80" cy="60" r="2.5" fill="#7c3aed" opacity="0.55"/>
+          <!-- Phone (lower left) -->
+          <rect x="14" y="80" width="30" height="38" rx="5" stroke="#7c3aed" stroke-width="2" fill="none"/>
+          <rect x="19" y="86" width="20" height="24" rx="2" fill="#7c3aed" fill-opacity="0.12"/>
+          <circle cx="29" cy="115" r="2.5" fill="#7c3aed" fill-opacity="0.45"/>
+          <!-- Wrench (lower right) -->
+          <circle cx="126" cy="87" r="11" stroke="#7c3aed" stroke-width="2" fill="none"/>
+          <circle cx="126" cy="87" r="4.5" fill="#7c3aed" fill-opacity="0.18"/>
+          <path d="M126 98 L126 116" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <path d="M121 98 L131 98" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
-      <p>Point your camera at whatever you need help with,<br>then tap <strong>Start Session</strong>.</p>
+      <p>Point your camera at whatever you need help with,<br>then tap <strong>Session</strong>.</p>
     </div>
     <div class="chat-card thinking-card" id="thinking-card">
       <div class="thinking-text">
@@ -1220,7 +1201,7 @@ canvas.hidden-canvas { display: none; }
 
 <!-- Controls -->
 <div class="controls" id="controls">
-  <button id="start-btn">Start Session</button>
+  <button id="start-btn"><span class="material-symbols-outlined" style="font-size:20px">play_circle</span>Session</button>
   <div class="session-controls" id="session-controls">
     <div class="toolbar-row">
       <button class="toolbar-btn" id="mute-btn" title="Mute microphone">
@@ -1235,8 +1216,11 @@ canvas.hidden-canvas { display: none; }
         <option value="vi">🇻🇳 VI</option>
         <option value="fr">🇫🇷 FR</option>
       </select>
+      <button class="toolbar-btn toolbar-btn-stop" id="stop-btn" title="Stop session">
+        <span class="material-symbols-outlined">stop</span>
+        <span class="listening-bars"><span></span><span></span><span></span><span></span></span>
+      </button>
     </div>
-    <button id="stop-btn"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px">stop</span>Stop</button>
   </div>
   <div class="chat-disclaimer">Clutch can make mistakes. Please double check responses.</div>
 </div>
@@ -1253,8 +1237,12 @@ canvas.hidden-canvas { display: none; }
   <div class="sheet-progress"><div class="bar" id="sheet-progress-bar"></div></div>
   <div class="sheet-body" id="sheet-body"></div>
   <div class="sheet-nav" id="sheet-nav">
-    <button class="btn-back" id="sheet-back" disabled>&#8592; Back</button>
-    <button class="btn-next" id="sheet-next">Next &#8594;</button>
+    <button class="nav-circle-btn btn-back" id="sheet-back" disabled aria-label="Back">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <button class="nav-circle-btn btn-next" id="sheet-next" aria-label="Next">
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
   </div>
 </div>
 
@@ -1263,7 +1251,7 @@ canvas.hidden-canvas { display: none; }
 <div class="yt-sheet-overlay" id="yt-sheet-overlay"></div>
 <div class="yt-bottom-sheet" id="yt-bottom-sheet">
   <div class="yt-sheet-header">
-    <div class="yt-sheet-title"><span class="material-symbols-outlined" style="color:#ff0000;font-size:26px;vertical-align:middle">play_circle</span> Related Videos</div>
+    <div class="yt-sheet-title"><span class="material-symbols-outlined" style="color:var(--primary);font-size:26px;vertical-align:middle">play_circle</span> Related Videos</div>
     <button class="yt-sheet-close" id="yt-sheet-close">&#10005;</button>
   </div>
   <div class="yt-sheet-body" id="yt-sheet-body"></div>
@@ -1309,7 +1297,7 @@ canvas.hidden-canvas { display: none; }
   var captureCanvas = document.getElementById("capture-canvas");
   var chatArea = document.getElementById("chat-area");
   var emptyState = document.getElementById("empty-state");
-  var statusBar = document.getElementById("status-bar");
+  var statusBar = document.getElementById("header-status");
   var statusDot = document.getElementById("status-dot");
   var statusTextEl = document.getElementById("status-text");
   var langSelect = document.getElementById("lang-select");
@@ -1373,12 +1361,15 @@ canvas.hidden-canvas { display: none; }
     var dotClass = "status-dot ", txt = "";
     switch (s) {
       case "listening":  dotClass += "green";  txt = "Listening..."; break;
-      case "thinking":   dotClass += "orange"; txt = "Clutch is thinking..."; break;
+      case "thinking":   dotClass += "orange"; txt = "Thinking..."; break;
       case "speaking":   dotClass += "blue";   txt = "Speaking..."; break;
       default:           dotClass += "gray";   txt = "Ready"; break;
     }
     statusDot.className = dotClass;
     statusTextEl.textContent = txt;
+    // Animate stop button when listening
+    var stopBtnEl = document.getElementById("stop-btn");
+    if (stopBtnEl) stopBtnEl.classList.toggle("listening", s === "listening");
   }
 
   // ==== Settings Modal ====
@@ -1546,7 +1537,7 @@ canvas.hidden-canvas { display: none; }
     if (!currentAgentTranscriptCard) {
       currentAgentTranscriptCard = document.createElement("div");
       currentAgentTranscriptCard.className = "chat-card agent-bubble";
-      currentAgentTranscriptCard.innerHTML = '<div class="bubble-label">Clutch</div>';
+      currentAgentTranscriptCard.innerHTML = '<div class="bubble-label"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;color:var(--primary)">handyman</span></div>';
       var viz = document.createElement("div"); viz.className = "spectrum-viz";
       for (var i = 0; i < 7; i++) { var bar = document.createElement("div"); bar.className = "bar"; bar.style.height = "4px"; viz.appendChild(bar); }
       currentAgentTranscriptCard.appendChild(viz);
@@ -1571,7 +1562,7 @@ canvas.hidden-canvas { display: none; }
   function addUserBubble(text) {
     hideEmptyState();
     var c = document.createElement("div"); c.className = "chat-card user-bubble";
-    c.innerHTML = '<div class="bubble-label">You</div><div class="bubble-text">' + escapeHtml(text) + '</div>';
+    c.innerHTML = '<div class="bubble-text">' + escapeHtml(text) + '</div>';
     chatArea.insertBefore(c, thinkingCard); scrollChat();
   }
 
@@ -1580,7 +1571,7 @@ canvas.hidden-canvas { display: none; }
     hideEmptyState();
     var c = document.createElement("div"); c.className = "procedure-card";
     c.innerHTML =
-      '<div class="proc-icon"><span class="material-symbols-outlined">handyman</span></div>' +
+      '<div class="proc-icon"><span class="material-symbols-outlined">menu_book</span></div>' +
       '<div class="proc-title">' + escapeHtml(task) + '</div>' +
       '<div class="proc-meta">' + stepCount + ' steps ready</div>' +
       '<div class="proc-cta">Tap to start &#8594;</div>';
@@ -1722,11 +1713,13 @@ canvas.hidden-canvas { display: none; }
 
     sheetBack.disabled = wizardCurrentStep === 0;
     if (wizardCurrentStep === total - 1) {
-      sheetNext.textContent = "Done";
-      sheetNext.className = "btn-next done";
+      sheetNext.innerHTML = '<span class="material-symbols-outlined">check</span>';
+      sheetNext.setAttribute("aria-label", "Done");
+      sheetNext.className = "nav-circle-btn btn-next done";
     } else {
-      sheetNext.innerHTML = "Next &#8594;";
-      sheetNext.className = "btn-next";
+      sheetNext.innerHTML = '<span class="material-symbols-outlined">arrow_forward</span>';
+      sheetNext.setAttribute("aria-label", "Next");
+      sheetNext.className = "nav-circle-btn btn-next";
     }
   }
 
@@ -1734,35 +1727,33 @@ canvas.hidden-canvas { display: none; }
     sheetProgressBar.style.width = "100%";
     sheetNav.style.display = "none";
     var html = '<div class="completion-screen">' +
-      '<div class="done-icon" style="margin-bottom:8px;"><span class="material-symbols-outlined" style="font-size:64px;color:var(--success)">celebration</span></div>' +
-      '<div class="done-title" style="font-size:22px;font-weight:800;color:var(--text-primary);">Nice work!</div>' +
-      '<div class="done-sub" style="color:var(--text-secondary);margin-top:4px;">You\'ve completed all ' + wizardSteps.length + ' steps.</div>' +
+      '<div class="done-icon" style="margin-bottom:8px;"><span class="material-symbols-outlined" style="font-size:64px;color:var(--on-surface-variant)">celebration</span></div>' +
+      '<div class="done-title" style="font-size:22px;font-weight:800;color:var(--on-surface);">Nice work!</div>' +
+      '<div class="done-sub" style="color:var(--on-surface-variant);margin-top:4px;">You\'ve completed all ' + wizardSteps.length + ' steps.</div>' +
       '<div class="feedback-widget">' +
         '<div class="feedback-label">How helpful were these steps?</div>' +
-        '<div class="feedback-thumbs">' +
-          '<button id="fb-down" aria-label="Not helpful">&#128078;</button>' +
-          '<button id="fb-up" aria-label="Helpful">&#128077;</button>' +
+        '<div class="feedback-faces">' +
+          '<button class="face-btn" data-score="1" aria-label="Very unhelpful">\uD83D\uDE21</button>' +
+          '<button class="face-btn" data-score="2" aria-label="Unhelpful">\uD83D\uDE14</button>' +
+          '<button class="face-btn" data-score="3" aria-label="Neutral">\uD83D\uDE10</button>' +
+          '<button class="face-btn" data-score="4" aria-label="Helpful">\uD83D\uDE42</button>' +
+          '<button class="face-btn" data-score="5" aria-label="Very helpful">\uD83D\uDE01</button>' +
         '</div>' +
         '<div class="feedback-thanks" id="fb-thanks">Thanks for your feedback!</div>' +
       '</div>' +
     '</div>';
     sheetBody.innerHTML = html;
 
-    // Feedback handlers
-    var fbUp = document.getElementById("fb-up");
-    var fbDown = document.getElementById("fb-down");
+    // Feedback handlers — 5 emoji faces
+    var faceBtns = sheetBody.querySelectorAll(".face-btn");
     var fbThanks = document.getElementById("fb-thanks");
-    fbUp.addEventListener("click", function() {
-      fbUp.classList.add("selected-up");
-      fbDown.classList.remove("selected-down");
-      fbThanks.classList.add("show");
-      console.log("[Feedback] Thumbs up for:", wizardTask);
-    });
-    fbDown.addEventListener("click", function() {
-      fbDown.classList.add("selected-down");
-      fbUp.classList.remove("selected-up");
-      fbThanks.classList.add("show");
-      console.log("[Feedback] Thumbs down for:", wizardTask);
+    faceBtns.forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        faceBtns.forEach(function(b) { b.classList.remove("selected"); });
+        btn.classList.add("selected");
+        fbThanks.classList.add("show");
+        console.log("[Feedback] Score " + btn.dataset.score + " for:", wizardTask);
+      });
     });
 
     // Launch confetti
@@ -2033,9 +2024,13 @@ canvas.hidden-canvas { display: none; }
     // Update empty state to "Start talking"
     if (emptyState) {
       var iconEl = emptyState.querySelector("#empty-icon");
-      if (iconEl) iconEl.innerHTML = '<span class="material-symbols-outlined" style="font-size:56px;color:var(--primary)">mic</span>';
+      if (iconEl) iconEl.style.display = "none";
       var pEl = emptyState.querySelector("p");
-      if (pEl) pEl.innerHTML = "Start talking";
+      if (pEl) {
+        pEl.style.fontSize = "18px";
+        pEl.style.fontWeight = "500";
+        pEl.innerHTML = "Start talking";
+      }
     }
     statusBar.classList.add("active");
     setStatus("ready");
@@ -2049,7 +2044,7 @@ canvas.hidden-canvas { display: none; }
     sessionActive = false;
     reconnecting = false;
     reconnectAttempts = 0;
-    startBtn.style.display = "inline-block";
+    startBtn.style.display = "";
     document.getElementById("session-controls").style.display = "none";
     statusBar.classList.remove("active");
     // Reset toolbar state
