@@ -68,7 +68,7 @@
 html, body {
   height: 100%;
   font-family: var(--font);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.55;
   background: var(--surface-dim);
   color: var(--on-surface);
@@ -97,15 +97,6 @@ header h1 {
   font-weight: 500;
   letter-spacing: 0.01em;
 }
-header h1::after {
-  content: '';
-  display: block;
-  height: 2px;
-  width: 36px;
-  margin-top: 5px;
-  background: var(--gradient);
-  border-radius: var(--radius-full);
-}
 header .tagline {
   font-size: 12px;
   color: rgba(255,255,255,0.5);
@@ -114,16 +105,18 @@ header .tagline {
 }
 .header-controls { display: flex; align-items: center; gap: 12px; }
 #lang-select {
-  background: rgba(255,255,255,0.10);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.18);
+  background: var(--surface-container);
+  color: var(--on-surface);
+  border: none;
   border-radius: var(--radius-full);
-  padding: 5px 12px;
+  padding: 0 14px;
   font-size: 13px;
   font-family: var(--font);
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
+  height: 44px;
+  min-width: 70px;
 }
 #lang-select option { color: #000; background: #fff; }
 .settings-btn {
@@ -303,7 +296,7 @@ main {
   color: var(--primary);
 }
 .chat-card .bubble-text {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--on-surface);
 }
@@ -352,13 +345,13 @@ main {
 }
 .chat-card.safety-warning .bubble-label { color: #e37400; }
 
-/* ── Spectrum visualiser (inside agent bubble) ── */
+/* ── Spectrum visualiser — waveform, grows both up and down from center ── */
 .chat-card .spectrum-viz {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 3px;
-  height: 24px;
-  padding: 2px 0;
+  height: 32px;
+  padding: 0;
 }
 .chat-card .spectrum-viz .bar {
   width: 4px;
@@ -481,18 +474,75 @@ main {
 .empty-state p { font-size: 15px; line-height: 1.6; }
 
 
-/* ════ CONTROLS (FAB row) ════ */
+/* ════ CONTROLS ════ */
 .controls {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, var(--surface) 28%);
+  padding: 10px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--surface) 24%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+/* Session active: stop + toolbar */
+.session-controls {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 380px;
+}
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.toolbar-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.toolbar-btn:active { background: var(--surface-variant); }
+.toolbar-btn.toolbar-btn-active {
+  background: rgba(26,115,232,0.12);
+  color: var(--primary);
+}
+
+/* Disclaimer — always visible above controls */
+.chat-disclaimer {
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  opacity: 0.55;
+  text-align: center;
+  padding: 2px 8px;
+  pointer-events: none;
+  letter-spacing: 0.01em;
+}
+
+/* Empty state illustration */
+.empty-icon {
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  z-index: 10;
+  align-items: center;
 }
 #start-btn, #stop-btn {
   border: none;
@@ -513,10 +563,13 @@ main {
 }
 #start-btn:active  { transform: scale(0.96); box-shadow: var(--shadow-1); }
 #stop-btn {
-  background: var(--error);
-  color: var(--on-error);
+  background: var(--header-bg);
+  color: #ffffff;
   box-shadow: var(--shadow-2);
   display: none;
+  gap: 6px;
+  align-items: center;
+  padding: 15px 36px;
 }
 #stop-btn:active { transform: scale(0.96); box-shadow: var(--shadow-1); }
 
@@ -561,7 +614,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px 6px;
+  padding: 12px 16px 28px;
   position: relative;
 }
 .sheet-header .pill {
@@ -806,17 +859,6 @@ main {
 }
 .sheet-nav .btn-next:active { box-shadow: none; }
 .sheet-nav .btn-next.done { background: var(--success); }
-.sheet-nav .btn-skip {
-  background: none;
-  border: none;
-  color: var(--on-surface-variant);
-  font-size: 13px;
-  font-weight: 500;
-  font-family: var(--font);
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: var(--radius-full);
-}
 
 
 /* ════ YOUTUBE ARTIFACT SHEET ════ */
@@ -943,34 +985,10 @@ main {
 }
 
 
-/* ════ VIDEOS FAB ════ */
-.yt-fab {
-  position: fixed;
-  bottom: 90px;
-  right: 16px;
-  z-index: 50;
-  background: var(--primary);
-  color: var(--on-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  padding: 11px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: var(--font);
-  display: none;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow-3);
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  animation: fab-in 0.35s cubic-bezier(0.2, 0, 0, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-.yt-fab:active { transform: scale(0.95); box-shadow: var(--shadow-1); }
-.yt-fab.show { display: flex; }
-@keyframes fab-in {
-  from { transform: scale(0.5) translateY(16px); opacity: 0; }
-  to   { transform: scale(1) translateY(0);      opacity: 1; }
+/* ════ VIDEO ARTIFACT CARD ════ */
+/* Uses .procedure-card styles; .video-card is just a marker class */
+.procedure-card.video-card .proc-icon .material-symbols-outlined {
+  font-size: 28px;
 }
 
 
@@ -1141,16 +1159,9 @@ canvas.hidden-canvas { display: none; }
 <header>
   <div class="top-row">
     <div>
-      <h1>&#128295; Clutch</h1>
-      <div class="tagline">The only tool in your box that tells you what to do next.</div>
+      <h1><span class="material-symbols-outlined" style="font-size:22px;vertical-align:middle;margin-right:6px">construction</span>Clutch</h1>
     </div>
     <div class="header-controls">
-      <select id="lang-select" aria-label="Language">
-        <option value="en">&#127482;&#127480; English</option>
-        <option value="es">&#127466;&#127480; Espa&#241;ol</option>
-        <option value="vi">&#127483;&#127475; Ti&#7871;ng Vi&#7879;t</option>
-        <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
-      </select>
       <button class="settings-btn" id="settings-btn" aria-label="Settings">&#9881;</button>
     </div>
   </div>
@@ -1187,7 +1198,15 @@ canvas.hidden-canvas { display: none; }
   <!-- LAYER 1: Chat area -->
   <div class="chat-area" id="chat-area">
     <div class="empty-state" id="empty-state">
-      <div class="icon">&#128064;</div>
+      <div class="empty-icon" id="empty-icon">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="22" width="64" height="44" rx="8" stroke="#1a73e8" stroke-width="2.5" fill="none"/>
+          <circle cx="40" cy="44" r="13" stroke="#1a73e8" stroke-width="2.5" fill="none"/>
+          <circle cx="40" cy="44" r="5.5" fill="#1a73e8" fill-opacity="0.22"/>
+          <path d="M29 22 L33 14 L47 14 L51 22" stroke="#1a73e8" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+          <circle cx="63" cy="31" r="2.5" fill="#1a73e8" fill-opacity="0.5"/>
+        </svg>
+      </div>
       <p>Point your camera at whatever you need help with,<br>then tap <strong>Start Session</strong>.</p>
     </div>
     <div class="chat-card thinking-card" id="thinking-card">
@@ -1202,7 +1221,24 @@ canvas.hidden-canvas { display: none; }
 <!-- Controls -->
 <div class="controls" id="controls">
   <button id="start-btn">Start Session</button>
-  <button id="stop-btn">Stop Session</button>
+  <div class="session-controls" id="session-controls">
+    <div class="toolbar-row">
+      <button class="toolbar-btn" id="mute-btn" title="Mute microphone">
+        <span class="material-symbols-outlined">mic</span>
+      </button>
+      <button class="toolbar-btn" id="cam-btn" title="Turn off camera">
+        <span class="material-symbols-outlined">videocam</span>
+      </button>
+      <select id="lang-select" aria-label="Language">
+        <option value="en">🇺🇸 EN</option>
+        <option value="es">🇪🇸 ES</option>
+        <option value="vi">🇻🇳 VI</option>
+        <option value="fr">🇫🇷 FR</option>
+      </select>
+    </div>
+    <button id="stop-btn"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px">stop</span>Stop</button>
+  </div>
+  <div class="chat-disclaimer">Clutch can make mistakes. Please double check responses.</div>
 </div>
 
 <!-- LAYER 2: Bottom sheet overlay -->
@@ -1218,7 +1254,6 @@ canvas.hidden-canvas { display: none; }
   <div class="sheet-body" id="sheet-body"></div>
   <div class="sheet-nav" id="sheet-nav">
     <button class="btn-back" id="sheet-back" disabled>&#8592; Back</button>
-    <button class="btn-skip" id="sheet-skip">Skip</button>
     <button class="btn-next" id="sheet-next">Next &#8594;</button>
   </div>
 </div>
@@ -1228,14 +1263,11 @@ canvas.hidden-canvas { display: none; }
 <div class="yt-sheet-overlay" id="yt-sheet-overlay"></div>
 <div class="yt-bottom-sheet" id="yt-bottom-sheet">
   <div class="yt-sheet-header">
-    <div class="yt-sheet-title"><div class="yt-icon">&#9654;</div> Related Videos</div>
+    <div class="yt-sheet-title"><span class="material-symbols-outlined" style="color:#ff0000;font-size:26px;vertical-align:middle">play_circle</span> Related Videos</div>
     <button class="yt-sheet-close" id="yt-sheet-close">&#10005;</button>
   </div>
   <div class="yt-sheet-body" id="yt-sheet-body"></div>
 </div>
-
-<!-- YouTube FAB -->
-<button class="yt-fab" id="yt-fab">&#9654; Videos</button>
 
 <!-- Hidden canvas for frame capture -->
 <canvas class="hidden-canvas" id="capture-canvas"></canvas>
@@ -1294,7 +1326,6 @@ canvas.hidden-canvas { display: none; }
   var ytBottomSheet = document.getElementById("yt-bottom-sheet");
   var ytSheetBody = document.getElementById("yt-sheet-body");
   var ytSheetClose = document.getElementById("yt-sheet-close");
-  var ytFab = document.getElementById("yt-fab");
 
   var thinkingCard = document.getElementById("thinking-card");
   var controls = document.getElementById("controls");
@@ -1307,9 +1338,14 @@ canvas.hidden-canvas { display: none; }
   var sheetNav = document.getElementById("sheet-nav");
   var sheetBack = document.getElementById("sheet-back");
   var sheetNext = document.getElementById("sheet-next");
-  var sheetSkip = document.getElementById("sheet-skip");
   var sheetCloseBtn = document.getElementById("sheet-close-btn");
   var sheetHeader = document.getElementById("sheet-header");
+
+  // Toolbar controls
+  var muteBtn = document.getElementById("mute-btn");
+  var camBtn = document.getElementById("cam-btn");
+  var isMicMuted = false;
+  var isCamOff = false;
 
   // ==== Helpers ====
   function getDefaultWsUrl() {
@@ -1544,7 +1580,7 @@ canvas.hidden-canvas { display: none; }
     hideEmptyState();
     var c = document.createElement("div"); c.className = "procedure-card";
     c.innerHTML =
-      '<div class="proc-icon">&#128295;</div>' +
+      '<div class="proc-icon"><span class="material-symbols-outlined">handyman</span></div>' +
       '<div class="proc-title">' + escapeHtml(task) + '</div>' +
       '<div class="proc-meta">' + stepCount + ' steps ready</div>' +
       '<div class="proc-cta">Tap to start &#8594;</div>';
@@ -1575,7 +1611,6 @@ canvas.hidden-canvas { display: none; }
   }
   ytSheetOverlay.addEventListener("click", closeYouTubeSheet);
   ytSheetClose.addEventListener("click", closeYouTubeSheet);
-  ytFab.addEventListener("click", openYouTubeSheet);
 
   function renderYouTubeSheet() {
     var html = '';
@@ -1593,13 +1628,20 @@ canvas.hidden-canvas { display: none; }
     ytSheetBody.innerHTML = html || '<div style="text-align:center;color:#999;padding:40px;">No videos found</div>';
   }
 
-  function showYouTubeFab() {
-    if (youtubeResults.length > 0) {
-      ytFab.classList.add("show");
-    }
-  }
-  function hideYouTubeFab() {
-    ytFab.classList.remove("show");
+  // ==== Video Artifact Card ====
+  function addVideoArtifactCard() {
+    if (youtubeResults.length === 0) return;
+    hideEmptyState();
+    var c = document.createElement("div");
+    c.className = "procedure-card video-card";
+    c.innerHTML =
+      '<div class="proc-icon"><span class="material-symbols-outlined">play_circle</span></div>' +
+      '<div class="proc-title">Related Videos</div>' +
+      '<div class="proc-meta">' + youtubeResults.length + ' video' + (youtubeResults.length !== 1 ? 's' : '') + ' found</div>' +
+      '<div class="proc-cta">Tap to watch \u2192</div>';
+    c.addEventListener("click", openYouTubeSheet);
+    chatArea.insertBefore(c, thinkingCard);
+    scrollChat();
   }
 
   // ==== Bottom Sheet Wizard ====
@@ -1692,7 +1734,7 @@ canvas.hidden-canvas { display: none; }
     sheetProgressBar.style.width = "100%";
     sheetNav.style.display = "none";
     var html = '<div class="completion-screen">' +
-      '<div class="done-icon" style="font-size:64px;margin-bottom:8px;">&#127881;</div>' +
+      '<div class="done-icon" style="margin-bottom:8px;"><span class="material-symbols-outlined" style="font-size:64px;color:var(--success)">celebration</span></div>' +
       '<div class="done-title" style="font-size:22px;font-weight:800;color:var(--text-primary);">Nice work!</div>' +
       '<div class="done-sub" style="color:var(--text-secondary);margin-top:4px;">You\'ve completed all ' + wizardSteps.length + ' steps.</div>' +
       '<div class="feedback-widget">' +
@@ -1796,14 +1838,6 @@ canvas.hidden-canvas { display: none; }
       renderCompletion();
     }
   });
-  sheetSkip.addEventListener("click", function() {
-    if (wizardCurrentStep < wizardSteps.length - 1) {
-      wizardCurrentStep++; renderWizardStep(); sendStepChange();
-    } else {
-      renderCompletion();
-    }
-  });
-
   // ==== WebSocket ====
   var reconnectAttempts = 0;
   var maxReconnectAttempts = 3;
@@ -1955,7 +1989,7 @@ canvas.hidden-canvas { display: none; }
     if (tool === "search_youtube" && result && Array.isArray(result)) {
       youtubeResults = result.filter(function(v) { return v.video_url && !v.error; });
       console.log("YouTube: raw=" + result.length + " filtered=" + youtubeResults.length, youtubeResults);
-      showYouTubeFab();
+      addVideoArtifactCard();
     } else if (tool === "search_youtube") {
       console.warn("search_youtube returned unexpected result:", result);
     }
@@ -1994,8 +2028,15 @@ canvas.hidden-canvas { display: none; }
     try { await startCamera(); } catch(e) { return; }
     sessionActive = true;
     startBtn.style.display = "none";
-    stopBtn.style.display = "inline-block";
+    document.getElementById("session-controls").style.display = "flex";
     cameraPreview.classList.add("session-preview");
+    // Update empty state to "Start talking"
+    if (emptyState) {
+      var iconEl = emptyState.querySelector("#empty-icon");
+      if (iconEl) iconEl.innerHTML = '<span class="material-symbols-outlined" style="font-size:56px;color:var(--primary)">mic</span>';
+      var pEl = emptyState.querySelector("p");
+      if (pEl) pEl.innerHTML = "Start talking";
+    }
     statusBar.classList.add("active");
     setStatus("ready");
     initPlayback();
@@ -2009,20 +2050,39 @@ canvas.hidden-canvas { display: none; }
     reconnecting = false;
     reconnectAttempts = 0;
     startBtn.style.display = "inline-block";
-    stopBtn.style.display = "none";
+    document.getElementById("session-controls").style.display = "none";
     statusBar.classList.remove("active");
+    // Reset toolbar state
+    isMicMuted = false; isCamOff = false;
+    if (muteBtn) { muteBtn.querySelector(".material-symbols-outlined").textContent = "mic"; muteBtn.classList.remove("toolbar-btn-active"); }
+    if (camBtn) { camBtn.querySelector(".material-symbols-outlined").textContent = "videocam"; camBtn.classList.remove("toolbar-btn-active"); }
     cameraPreview.classList.remove("session-preview");
     hideThinking(); stopSpectrumAnim();
     currentAgentTranscriptCard = null;
     closeWizard();
     closeYouTubeSheet();
-    hideYouTubeFab();
     // Keep wizardSteps and youtubeResults so old procedure cards remain tappable
     stopFrameCapture(); stopAudioCapture(); stopAllPlayback();
     if (ws) { try { ws.send(JSON.stringify({ type: "activity_end" })); } catch(e){} ws.close(); ws = null; }
     if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
     if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   }
+
+  // ==== Toolbar: Mute + Camera ====
+  muteBtn.addEventListener("click", function() {
+    isMicMuted = !isMicMuted;
+    setMicMuted(isMicMuted);
+    muteBtn.querySelector(".material-symbols-outlined").textContent = isMicMuted ? "mic_off" : "mic";
+    muteBtn.classList.toggle("toolbar-btn-active", isMicMuted);
+  });
+  camBtn.addEventListener("click", function() {
+    isCamOff = !isCamOff;
+    if (mediaStream) {
+      mediaStream.getVideoTracks().forEach(function(t) { t.enabled = !isCamOff; });
+    }
+    camBtn.querySelector(".material-symbols-outlined").textContent = isCamOff ? "videocam_off" : "videocam";
+    camBtn.classList.toggle("toolbar-btn-active", isCamOff);
+  });
 
   startBtn.addEventListener("click", startSession);
   stopBtn.addEventListener("click", stopSession);
