@@ -7,18 +7,84 @@ struct HomeView: View {
 
     var body: some View {
         @Bindable var state = state
-        VStack(spacing: 0) {
-            header
-            ScrollView {
-                VStack(spacing: 24) {
-                    connectionBadge
-                    actionButtons
-                    languageSelector
+        ZStack {
+            CosmicGradientBackground()
+
+            VStack(spacing: 0) {
+                // Settings gear — top right
+                HStack {
+                    Spacer()
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundColor(.white.opacity(0.75))
+                            .glassCircle(size: 40)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                Spacer()
+
+                // Hero
+                VStack(spacing: 10) {
+                    Text("Clutch")
+                        .font(.system(size: 54, weight: .bold, design: .default))
+                        .foregroundColor(.white)
+
+                    Text("See it. Ask it. Do it.")
+                        .font(.title3)
+                        .foregroundColor(.white.opacity(0.60))
+
+                    // Status indicator
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(state.connectionStatus.color)
+                            .frame(width: 8, height: 8)
+                        Text(state.connectionStatus.label)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.55))
+                    }
+                    .padding(.top, 6)
+                }
+
+                Spacer()
+
+                // Action buttons + language selector
+                VStack(spacing: 14) {
+                    Button {
+                        Task { await connectGlasses() }
+                    } label: {
+                        Label("Connect Glasses", systemImage: "eyeglasses")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                    }
+                    .glassButton()
+                    .buttonStyle(.plain)
+
+                    Button {
+                        state.usePhoneCamera = true
+                        state.showSession = true
+                    } label: {
+                        Label("Use Phone Camera", systemImage: "camera.fill")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                    }
+                    .glassButton()
+                    .buttonStyle(.plain)
+
+                    languageSelector
+                        .padding(.top, 4)
+                }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 52)
             }
         }
-        .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $showSettings) { SettingsSheet(wsURL: $state.wsURL) }
         .alert("Connecting to Meta App…", isPresented: $showRegistering) {
             Button("Cancel", role: .cancel) { showRegistering = false }
@@ -32,109 +98,41 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Subviews
-
-    private var header: some View {
-        ZStack(alignment: .topTrailing) {
-            HStack(spacing: 10) {
-                Image(systemName: "wrench.and.screwdriver.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Clutch")
-                        .font(.title2.bold())
-                        .foregroundColor(.white)
-                    Text("Hands-free task assistant")
-                        .font(.caption)
-                        .foregroundColor(Color.white.opacity(0.7))
-                }
-                Spacer()
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.title3)
-                        .foregroundColor(.white.opacity(0.8))
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 14)
-        }
-        .background(Color(red: 0.1, green: 0.1, blue: 0.18))
-    }
-
-    private var connectionBadge: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(state.connectionStatus.color)
-                .frame(width: 10, height: 10)
-            Text(state.connectionStatus.label)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-    }
-
-    private var actionButtons: some View {
-        VStack(spacing: 14) {
-            Button {
-                Task { await connectGlasses() }
-            } label: {
-                Label("Connect Glasses", systemImage: "eyeglasses")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color(red: 0.1, green: 0.1, blue: 0.18))
-            .cornerRadius(14)
-
-            Button {
-                state.usePhoneCamera = true
-                state.showSession = true
-            } label: {
-                Label("Use Phone Camera", systemImage: "camera.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-            }
-            .buttonStyle(.bordered)
-            .cornerRadius(14)
-        }
-    }
+    // MARK: - Language selector
 
     private var languageSelector: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Language")
-                .font(.subheadline.bold())
-                .foregroundColor(.secondary)
-            HStack(spacing: 10) {
-                ForEach(AppLanguage.all) { lang in
-                    let selected = state.selectedLanguage.id == lang.id
-                    Button {
-                        state.selectedLanguage = lang
-                    } label: {
-                        VStack(spacing: 4) {
-                            Text(lang.flag).font(.title2)
-                            Text(lang.name)
-                                .font(.caption2)
-                                .lineLimit(1)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(selected ? Color.accentColor.opacity(0.15) : Color(.secondarySystemGroupedBackground))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(selected ? Color.accentColor : .clear, lineWidth: 2)
-                        )
-                        .cornerRadius(10)
+        HStack(spacing: 10) {
+            ForEach(AppLanguage.all) { lang in
+                let selected = state.selectedLanguage.id == lang.id
+                Button {
+                    state.selectedLanguage = lang
+                } label: {
+                    VStack(spacing: 4) {
+                        Text(lang.flag).font(.title2)
+                        Text(lang.name)
+                            .font(.caption2)
+                            .lineLimit(1)
+                            .foregroundColor(.white.opacity(selected ? 1.0 : 0.55))
                     }
-                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.clutchViolet.opacity(selected ? 0.22 : 0.06))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        selected ? Color.clutchPrimary : Color.clear,
+                                        lineWidth: 1.5
+                                    )
+                            )
+                    )
                 }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -145,11 +143,9 @@ struct HomeView: View {
     private func connectGlasses() async {
         state.usePhoneCamera = false
         showRegistering = true
-        // Trigger DAT registration (or skip if already registered)
         NotificationCenter.default.post(name: .clutchStartRegistration, object: nil)
-        
-        // Wait for connection (poll connectionStatus)
-        for _ in 0..<30 { // up to 30 seconds
+
+        for _ in 0..<30 {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
             if case .connected = state.connectionStatus {
                 showRegistering = false
@@ -157,7 +153,6 @@ struct HomeView: View {
                 return
             }
         }
-        // Timeout
         showRegistering = false
     }
 }

@@ -4,125 +4,252 @@ struct WizardSheet: View {
     @Environment(AppState.self) private var state
     var wsManager: WebSocketManager?
 
+    @State private var showCompletion = false
+
     var body: some View {
-        @Bindable var state = state
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Progress bar
-                GeometryReader { geo in
-                    let pct = state.wizardSteps.isEmpty ? 0.0
-                        : CGFloat(state.wizardCurrentStep + 1) / CGFloat(state.wizardSteps.count)
-                    ZStack(alignment: .leading) {
-                        Rectangle().fill(Color(.systemGray5))
-                        Rectangle()
-                            .fill(Color.accentColor)
-                            .frame(width: geo.size.width * pct)
-                            .animation(.easeInOut(duration: 0.3), value: pct)
-                    }
-                }
-                .frame(height: 4)
+        ZStack {
+            CosmicGradientBackground()
 
-                if !state.wizardSteps.isEmpty {
-                    let step = state.wizardSteps[state.wizardCurrentStep]
-                    let total = state.wizardSteps.count
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Step badge
-                            HStack(spacing: 10) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.accentColor)
-                                        .frame(width: 36, height: 36)
-                                    Text("\(step.number)")
-                                        .font(.headline.bold())
-                                        .foregroundColor(.white)
-                                }
-                                Text("Step \(step.number) of \(total)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-
-                            // Instruction
-                            Text(step.instruction)
-                                .font(.body)
-                                .fixedSize(horizontal: false, vertical: true)
-
-                            // Tools needed
-                            if !step.toolsNeeded.isEmpty {
-                                HStack {
-                                    Image(systemName: "wrench")
-                                        .foregroundColor(.secondary)
-                                    Text(step.toolsNeeded.joined(separator: ", "))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-
-                            // AI-generated image (after instruction)
-                            if let dataURL = step.imageDataURL,
-                               let uiImage = Data.fromDataURL(dataURL) {
-                                ZStack(alignment: .bottomTrailing) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .cornerRadius(12)
-                                    Text("AI-generated")
-                                        .font(.caption2.bold())
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 3)
-                                        .background(Color.black.opacity(0.6))
-                                        .foregroundColor(.white)
-                                        .cornerRadius(6)
-                                        .padding(8)
-                                }
-                            }
-                        }
-                        .padding(20)
-                    }
-
-                    // Navigation buttons
-                    HStack(spacing: 12) {
-                        Button {
-                            if state.wizardCurrentStep > 0 {
-                                state.wizardCurrentStep -= 1
-                                notifyStepChange()
-                            }
-                        } label: {
-                            Text("Back")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(state.wizardCurrentStep == 0)
-
-                        Button {
-                            skip()
-                        } label: {
-                            Text("Skip")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-
-                        Button {
-                            advance()
-                        } label: {
-                            Text(state.wizardCurrentStep == total - 1 ? "Done" : "Next →")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .padding(16)
-                }
+            if showCompletion {
+                completionScreen
+            } else {
+                mainContent
             }
-            .navigationTitle(state.procedureTitle.isEmpty ? "Steps" : state.procedureTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { state.wizardOpen = false }
+        }
+        .presentationBackground(.clear)
+    }
+
+    // MARK: - Main Content
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            // Header bar
+            headerBar
+
+            if !state.wizardSteps.isEmpty {
+                let step = state.wizardSteps[state.wizardCurrentStep]
+                let total = state.wizardSteps.count
+
+                // Progress bar
+                progressBar(pct: CGFloat(state.wizardCurrentStep + 1) / CGFloat(total))
+                    .padding(.bottom, 4)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Step badge
+                        HStack(spacing: 12) {
+                            // Glass circle with violet border
+                            ZStack {
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(Circle().stroke(Color.clutchPrimary, lineWidth: 2))
+                                    .frame(width: 40, height: 40)
+                                Text("\(step.number)")
+                                    .font(.headline.bold())
+                                    .foregroundColor(.clutchPrimary)
+                            }
+                            Text("Step \(step.number) of \(total)")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.60))
+                            Spacer()
+                        }
+
+                        // Instruction
+                        Text(step.instruction)
+                            .font(.system(size: 17))
+                            .foregroundColor(.white)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        // Tools needed
+                        if !step.toolsNeeded.isEmpty {
+                            HStack(spacing: 6) {
+                                Image(systemName: "wrench.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.clutchPrimary)
+                                Text(step.toolsNeeded.joined(separator: ", "))
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.65))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .glassCard(cornerRadius: 10)
+                        }
+
+                        // AI-generated image
+                        if let dataURL = step.imageDataURL,
+                           let uiImage = Data.fromDataURL(dataURL) {
+                            ZStack(alignment: .bottomTrailing) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.clutchPrimary.opacity(0.40), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.30), radius: 10, x: 0, y: 4)
+
+                                Text("AI-generated")
+                                    .font(.caption2.bold())
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Capsule().fill(.ultraThinMaterial))
+                                    .foregroundColor(.white)
+                                    .padding(10)
+                            }
+                        }
+                    }
+                    .padding(20)
                 }
+
+                // Navigation buttons
+                navButtons(total: total)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
+                    .padding(.top, 8)
             }
         }
     }
+
+    // MARK: - Header Bar
+
+    private var headerBar: some View {
+        ZStack {
+            Text(state.procedureTitle.isEmpty ? "Steps" : state.procedureTitle)
+                .font(.headline)
+                .foregroundColor(.white)
+                .lineLimit(1)
+
+            HStack {
+                Spacer()
+                Button { state.wizardOpen = false } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white.opacity(0.80))
+                        .glassCircle(size: 32)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+    }
+
+    // MARK: - Progress Bar
+
+    private func progressBar(pct: CGFloat) -> some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.12))
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(
+                        LinearGradient(
+                            colors: [.clutchPrimary, .clutchViolet],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: geo.size.width * pct)
+                    .animation(.easeInOut(duration: 0.35), value: pct)
+            }
+        }
+        .frame(height: 4)
+        .padding(.horizontal, 20)
+    }
+
+    // MARK: - Nav Buttons
+
+    private func navButtons(total: Int) -> some View {
+        HStack {
+            // Back
+            Button {
+                if state.wizardCurrentStep > 0 {
+                    state.wizardCurrentStep -= 1
+                    notifyStepChange()
+                }
+            } label: {
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(state.wizardCurrentStep == 0 ? .white.opacity(0.30) : .white)
+                    .glassCircle(size: 52)
+            }
+            .buttonStyle(.plain)
+            .disabled(state.wizardCurrentStep == 0)
+
+            Spacer()
+
+            // Skip (subtle text)
+            Button { skip() } label: {
+                Text("Skip")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.50))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .glassCard(cornerRadius: 12)
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            // Next / Done
+            let isLast = state.wizardCurrentStep == total - 1
+            Button { advance() } label: {
+                Image(systemName: isLast ? "checkmark" : "arrow.right")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .glassCircle(size: 52, highlighted: isLast)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Completion Screen
+
+    private var completionScreen: some View {
+        VStack(spacing: 0) {
+            headerBar
+
+            Spacer()
+
+            VStack(spacing: 24) {
+                Image(systemName: "party.popper.fill")
+                    .font(.system(size: 56))
+                    .foregroundColor(.clutchPrimary)
+
+                VStack(spacing: 8) {
+                    Text("All Done!")
+                        .font(.title.bold())
+                        .foregroundColor(.white)
+                    Text("How did it go?")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.60))
+                }
+
+                // Emoji feedback row
+                HStack(spacing: 16) {
+                    ForEach(["👍", "❤️", "⭐", "🤩", "🎉"], id: \.self) { emoji in
+                        Button {
+                            closeAfterCompletion()
+                        } label: {
+                            Text(emoji)
+                                .font(.title2)
+                                .padding(12)
+                                .glassCircle(size: 52)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(32)
+            .glassCard(cornerRadius: 24)
+            .padding(.horizontal, 24)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Logic
 
     private func advance() {
         let total = state.wizardSteps.count
@@ -130,13 +257,17 @@ struct WizardSheet: View {
             state.wizardCurrentStep += 1
             notifyStepChange()
         } else {
-            state.wizardOpen = false
-            state.showYouTube = !state.youtubeVideos.isEmpty
+            showCompletion = true
         }
     }
 
     private func skip() {
         advance()
+    }
+
+    private func closeAfterCompletion() {
+        state.wizardOpen = false
+        state.showYouTube = !state.youtubeVideos.isEmpty
     }
 
     private func notifyStepChange() {

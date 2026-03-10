@@ -14,17 +14,29 @@ struct SessionView: View {
 
     var body: some View {
         @Bindable var state = state
-        VStack(spacing: 0) {
-            topBar
-            cameraPreviewArea
-            statusRow
-            chatArea
-            if !state.wizardSteps.isEmpty {
-                procedureCardButton
+        ZStack {
+            CosmicGradientBackground(dimmed: true)
+
+            VStack(spacing: 0) {
+                // Status pill
+                statusPill
+                    .padding(.top, 14)
+                    .padding(.bottom, 4)
+
+                // Chat area
+                chatArea
+
+                // Procedure card (shown when wizard steps are available)
+                if !state.wizardSteps.isEmpty {
+                    procedureCardButton
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                }
+
+                // Bottom toolbar
+                bottomToolbar
             }
-            stopRow
         }
-        .background(Color(.systemGroupedBackground))
         .sheet(isPresented: $state.wizardOpen) {
             WizardSheet(wsManager: wsManager)
                 .environment(state)
@@ -37,88 +49,55 @@ struct SessionView: View {
         .onDisappear { endSession() }
     }
 
-    // MARK: - Top bar
+    // MARK: - Status Pill
 
-    private var topBar: some View {
-        HStack {
-            Text("🔧 Clutch")
-                .font(.headline.bold())
-                .foregroundColor(.white)
-            Spacer()
-            Text(state.selectedLanguage.flag + " " + state.selectedLanguage.name)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color(red: 0.1, green: 0.1, blue: 0.18))
-    }
-
-    // MARK: - Camera preview
-
-    private var cameraPreviewArea: some View {
-        ZStack {
-            Color.black
+    private var statusPill: some View {
+        HStack(spacing: 8) {
             if permissionDenied {
-                VStack(spacing: 8) {
-                    Image(systemName: "camera.slash.fill")
-                        .font(.system(size: 48))
-                        .foregroundColor(.red.opacity(0.8))
-                    Text("Camera & Mic permission needed")
-                        .font(.caption.bold())
-                        .foregroundColor(.white.opacity(0.8))
-                    Text("Enable in Settings > Clutch")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
-                }
-            } else if let cameraManager {
-                CameraPreviewView(session: cameraManager.captureSession)
-                    .aspectRatio(4/3, contentMode: .fit)
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.red)
+                    .font(.caption)
+                Text("Permission Required")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
+            } else if cameraManager != nil {
+                Image(systemName: "camera.fill")
+                    .foregroundColor(.clutchPrimary)
+                    .font(.caption)
+                Text("Phone Camera")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
             } else {
-                VStack(spacing: 8) {
-                    Image(systemName: "eyeglasses")
-                        .font(.system(size: 48))
-                        .foregroundColor(.white.opacity(0.6))
-                    Text("Viewing through glasses")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
-                }
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 8, height: 8)
+                Text("Glasses Connected")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
             }
         }
-        .frame(height: 180)
-        .cornerRadius(12)
         .padding(.horizontal, 16)
-        .padding(.top, 12)
+        .padding(.vertical, 8)
+        .glassCard(cornerRadius: 20)
     }
 
-    // MARK: - Status row
-
-    private var statusRow: some View {
-        HStack(spacing: 8) {
-            Image(systemName: state.sessionStatus.icon)
-                .foregroundColor(state.sessionStatus.color)
-            Text(state.sessionStatus.label)
-                .font(.subheadline.bold())
-                .foregroundColor(state.sessionStatus.color)
-            Spacer()
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-    }
-
-    // MARK: - Chat area
+    // MARK: - Chat Area
 
     private var chatArea: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 8) {
+                LazyVStack(alignment: .leading, spacing: 10) {
+                    if state.sessionStatus == .thinking {
+                        thinkingIndicator
+                            .padding(.horizontal, 16)
+                    }
                     ForEach(state.chatMessages) { msg in
                         ChatBubble(message: msg)
+                            .padding(.horizontal, 16)
                             .id(msg.id)
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
             }
             .frame(minHeight: 80, maxHeight: .infinity)
             .onChange(of: state.chatMessages.count) { _, _ in
@@ -129,60 +108,108 @@ struct SessionView: View {
         }
     }
 
-    // MARK: - Procedure card
+    private var thinkingIndicator: some View {
+        HStack(spacing: 8) {
+            ThinkingDot()
+            Text("Thinking...")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.70))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .glassCard(cornerRadius: 16)
+    }
+
+    // MARK: - Procedure Card
 
     private var procedureCardButton: some View {
         Button {
             state.wizardOpen = true
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: 0) {
+                // Gradient accent stripe on left edge
+                LinearGradient(
+                    colors: [.clutchPrimary, .clutchViolet],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(width: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
+                .padding(.trailing, 12)
+
                 Image(systemName: "list.number")
                     .font(.title3)
-                    .foregroundColor(.white)
+                    .foregroundColor(.clutchPrimary)
+                    .padding(.trailing, 10)
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text(state.procedureTitle.isEmpty ? "View Steps" : state.procedureTitle)
                         .font(.subheadline.bold())
                         .foregroundColor(.white)
                     Text("\(state.wizardSteps.count) steps")
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.60))
                 }
+
                 Spacer()
+
                 Image(systemName: "chevron.up")
-                    .foregroundColor(.white.opacity(0.7))
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.50))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(red: 0.1, green: 0.1, blue: 0.18))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .glassCard(cornerRadius: 16)
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 16)
-        .cornerRadius(12)
     }
 
-    // MARK: - Stop button
+    // MARK: - Bottom Toolbar
 
-    private var stopRow: some View {
-        Button {
-            endSession()
-            state.showSession = false
-        } label: {
-            Label("Stop Session", systemImage: "stop.circle.fill")
-                .font(.headline)
+    private var bottomToolbar: some View {
+        HStack(spacing: 16) {
+            // Session status + waveform
+            HStack(spacing: 8) {
+                Image(systemName: state.sessionStatus.icon)
+                    .foregroundColor(state.sessionStatus.color)
+                    .font(.caption)
+                Text(state.sessionStatus.label)
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.80))
+
+                if state.sessionStatus == .listening || state.sessionStatus == .speaking {
+                    WaveformView()
+                }
+            }
+
+            Spacer()
+
+            // Stop button
+            Button {
+                endSession()
+                state.showSession = false
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "stop.fill")
+                    Text("Stop")
+                }
+                .font(.subheadline.bold())
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.red.opacity(0.85))
-                .cornerRadius(14)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .glassButton()
+            }
+            .buttonStyle(.plain)
         }
-        .padding(16)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(.ultraThinMaterial)
     }
 
-    // MARK: - Session lifecycle
+    // MARK: - Session Lifecycle
 
     private func startSession() {
         Task {
-            // Request microphone permission
             let micGranted = await audioManager.requestMicAccess()
             guard micGranted else {
                 await MainActor.run { permissionDenied = true }
@@ -193,13 +220,11 @@ struct SessionView: View {
             if case .connected = state.connectionStatus { bluetoothConnected = true } else { bluetoothConnected = false }
             audioManager.configureAudioSession(bluetoothOutput: bluetoothConnected)
 
-            // Start audio capture
             audioManager.onAudioCaptured = { [weak wsManager = wsManager] data in
                 wsManager?.sendAudio(data)
             }
             audioManager.startCapture()
 
-            // Start camera (phone) and wire up frame sending
             if let cam = cameraManager {
                 let camOk = await cam.requestAccessAndStart()
                 if camOk {
@@ -211,7 +236,6 @@ struct SessionView: View {
                 }
             }
 
-            // Start WebSocket
             wsManager.audioManager = audioManager
             wsManager.connect()
             await MainActor.run { state.sessionStatus = .listening }
@@ -235,47 +259,49 @@ struct ChatBubble: View {
 
     var body: some View {
         HStack {
-            if message.isUser { Spacer() }
+            if message.isUser {
+                Spacer(minLength: 60)
+                userBubble
+            } else {
+                agentBubble
+                Spacer(minLength: 60)
+            }
+        }
+    }
+
+    private var agentBubble: some View {
+        Text(message.text)
+            .font(.subheadline)
+            .foregroundColor(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .glassCard(cornerRadius: 16)
+            .frame(maxWidth: 280, alignment: .leading)
+    }
+
+    private var userBubble: some View {
+        HStack(spacing: 0) {
+            // Violet left border accent
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color.clutchPrimary)
+                .frame(width: 3)
+
             Text(message.text)
                 .font(.subheadline)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(message.isUser ? Color.blue : Color(.systemGray4))
-                .foregroundColor(message.isUser ? .white : .primary)
-                .cornerRadius(16)
-                .frame(maxWidth: 260, alignment: message.isUser ? .trailing : .leading)
-            if !message.isUser { Spacer() }
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
         }
-    }
-}
-
-// MARK: - Camera preview UIViewRepresentable
-
-struct CameraPreviewView: UIViewRepresentable {
-    let session: AVCaptureSession
-
-    func makeUIView(context: Context) -> PreviewUIView {
-        let view = PreviewUIView()
-        view.session = session
-        return view
-    }
-
-    func updateUIView(_ uiView: PreviewUIView, context: Context) {}
-}
-
-final class PreviewUIView: UIView {
-    var session: AVCaptureSession? {
-        didSet {
-            guard let session else { return }
-            (layer as? AVCaptureVideoPreviewLayer)?.session = session
-        }
-    }
-
-    override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        (layer as? AVCaptureVideoPreviewLayer)?.videoGravity = .resizeAspectFill
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.clutchViolet.opacity(0.22))
+                )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .frame(maxWidth: 280, alignment: .trailing)
     }
 }
 

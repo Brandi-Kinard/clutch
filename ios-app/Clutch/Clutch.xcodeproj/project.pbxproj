@@ -271,7 +271,7 @@
 				DEVELOPMENT_TEAM = R4K6LJ6GCD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Clutch needs Bluetooth to connect to your smart glasses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Clutch uses the camera to see what you need help with";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Clutch listens so it can help you hands-free";
@@ -300,7 +300,7 @@
 				DEVELOPMENT_TEAM = R4K6LJ6GCD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Info.plist";
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Clutch needs Bluetooth to connect to your smart glasses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Clutch uses the camera to see what you need help with";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Clutch listens so it can help you hands-free";
