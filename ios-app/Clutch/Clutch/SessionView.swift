@@ -28,10 +28,10 @@ struct SessionView: View {
 
                 // Chat area (includes inline procedure + video cards)
                 chatArea
-
-                // Bottom toolbar
-                bottomToolbar
             }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            bottomToolbar
         }
         .sheet(isPresented: $state.wizardOpen) {
             WizardSheet(wsManager: wsManager)
@@ -240,45 +240,54 @@ struct SessionView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Bottom Toolbar
+    // MARK: - Floating Toolbar
 
     private var bottomToolbar: some View {
-        HStack(spacing: 0) {
-            // Left: mic, camera, language
-            HStack(spacing: 12) {
-                // Mute mic
-                Button {
-                    micMuted.toggle()
-                    if micMuted { audioManager.stopCapture() } else { audioManager.startCapture() }
-                } label: {
-                    Image(systemName: micMuted ? "mic.slash.fill" : "mic.fill")
-                        .font(.system(size: 17))
-                        .foregroundColor(micMuted ? .red.opacity(0.85) : .white)
-                        .glassCircle(size: 44)
-                }
-                .buttonStyle(.plain)
-
-                // Camera toggle (visual state only — glasses-only app)
-                Button { cameraOff.toggle() } label: {
-                    Image(systemName: cameraOff ? "video.slash.fill" : "video.fill")
-                        .font(.system(size: 17))
-                        .foregroundColor(cameraOff ? .red.opacity(0.85) : .white)
-                        .glassCircle(size: 44)
-                }
-                .buttonStyle(.plain)
-
-                // Language cycle
-                Button { cycleLanguage() } label: {
-                    HStack(spacing: 3) {
-                        Image(systemName: "globe")
-                            .font(.system(size: 13))
-                        Text(state.selectedLanguage.flag)
-                            .font(.system(size: 14))
-                    }
-                    .foregroundColor(.white)
+        HStack(spacing: 10) {
+            // Mute mic
+            Button {
+                micMuted.toggle()
+                if micMuted { audioManager.stopCapture() } else { audioManager.startCapture() }
+            } label: {
+                Image(systemName: micMuted ? "mic.slash.fill" : "mic.fill")
+                    .font(.system(size: 17))
+                    .foregroundColor(micMuted ? .red.opacity(0.85) : .white)
                     .glassCircle(size: 44)
+            }
+            .buttonStyle(.plain)
+
+            // Camera toggle (visual state only — glasses-only app)
+            Button { cameraOff.toggle() } label: {
+                Image(systemName: cameraOff ? "video.slash.fill" : "video.fill")
+                    .font(.system(size: 17))
+                    .foregroundColor(cameraOff ? .red.opacity(0.85) : .white)
+                    .glassCircle(size: 44)
+            }
+            .buttonStyle(.plain)
+
+            // Language menu pill
+            Menu {
+                ForEach(AppLanguage.all) { lang in
+                    Button {
+                        state.selectedLanguage = lang
+                    } label: {
+                        Label(
+                            lang.flag + "  " + lang.name,
+                            systemImage: state.selectedLanguage.id == lang.id ? "checkmark" : ""
+                        )
+                    }
                 }
-                .buttonStyle(.plain)
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "globe")
+                        .font(.system(size: 13, weight: .medium))
+                    Text(state.selectedLanguage.flag)
+                        .font(.system(size: 15))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .glassButton()
             }
 
             Spacer()
@@ -300,17 +309,22 @@ struct SessionView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(.ultraThinMaterial)
-    }
-
-    // MARK: - Helpers
-
-    private func cycleLanguage() {
-        let all = AppLanguage.all
-        let current = all.firstIndex(where: { $0.id == state.selectedLanguage.id }) ?? 0
-        state.selectedLanguage = all[(current + 1) % all.count]
+        // Inner padding of the floating pill
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        // Floating pill background: liquid glass with rounded corners and shadow
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.clutchViolet.opacity(0.10))
+                )
+                .shadow(color: .black.opacity(0.28), radius: 16, x: 0, y: 6)
+        )
+        // Outer margins: keeps pill away from screen edges and home indicator
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 
     // MARK: - Session Lifecycle
@@ -333,6 +347,7 @@ struct SessionView: View {
             audioManager.startCapture()
 
             if let cam = cameraManager {
+                // Phone camera path
                 let camOk = await cam.requestAccessAndStart()
                 if camOk {
                     cam.onFrame = { [weak wsManager = wsManager] data in
@@ -346,6 +361,12 @@ struct SessionView: View {
             wsManager.audioManager = audioManager
             wsManager.connect()
             await MainActor.run { state.sessionStatus = .listening }
+
+            // Glasses camera path: start AFTER WebSocket is connected so the
+            // StreamSession doesn't get an internalError from launching too early.
+            if cameraManager == nil {
+                await datManager?.startGlassesCamera()
+            }
         }
     }
 
@@ -354,6 +375,10 @@ struct SessionView: View {
         audioManager.stopCapture()
         audioManager.stopPlayback()
         cameraManager?.stop()
+        // Stop glasses stream when session ends
+        if cameraManager == nil {
+            datManager?.stopGlassesCamera()
+        }
         state.sessionStatus = .idle
         state.showSession = false
     }
