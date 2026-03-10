@@ -8,14 +8,17 @@ struct SessionView: View {
     let cameraManager: CameraManager?   // nil when using glasses
     let datManager: DATManager?
 
-    @State private var showWizard = false
-    @State private var showYouTube = false
     @State private var permissionDenied = false
+    @State private var micMuted = false
+    @State private var cameraOff = false
 
     var body: some View {
         @Bindable var state = state
         ZStack {
-            CosmicGradientBackground(dimmed: true)
+            CosmicGradientBackground(
+                dimmed: true,
+                pulsing: state.sessionStatus == .speaking
+            )
 
             VStack(spacing: 0) {
                 // Status pill
@@ -23,15 +26,8 @@ struct SessionView: View {
                     .padding(.top, 14)
                     .padding(.bottom, 4)
 
-                // Chat area
+                // Chat area (includes inline procedure + video cards)
                 chatArea
-
-                // Procedure card (shown when wizard steps are available)
-                if !state.wizardSteps.isEmpty {
-                    procedureCardButton
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 8)
-                }
 
                 // Bottom toolbar
                 bottomToolbar
@@ -87,26 +83,63 @@ struct SessionView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
-                    if state.sessionStatus == .thinking {
-                        thinkingIndicator
-                            .padding(.horizontal, 16)
-                    }
                     ForEach(state.chatMessages) { msg in
                         ChatBubble(message: msg)
                             .padding(.horizontal, 16)
                             .id(msg.id)
                     }
+
+                    // Thinking indicator after last message
+                    if state.sessionStatus == .thinking {
+                        thinkingIndicator
+                            .padding(.horizontal, 16)
+                            .id("thinking")
+                    }
+
+                    // Inline procedure card
+                    if !state.wizardSteps.isEmpty {
+                        inlineProcedureCard
+                            .padding(.horizontal, 16)
+                            .id("procedure-card")
+                    }
+
+                    // Inline YouTube card
+                    if !state.youtubeVideos.isEmpty {
+                        inlineYouTubeCard
+                            .padding(.horizontal, 16)
+                            .id("youtube-card")
+                    }
                 }
                 .padding(.vertical, 12)
             }
             .frame(minHeight: 80, maxHeight: .infinity)
+            // Empty state overlay
+            .overlay {
+                if state.chatMessages.isEmpty && state.sessionStatus != .thinking {
+                    Text("Start talking")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.white.opacity(0.75))
+                }
+            }
             .onChange(of: state.chatMessages.count) { _, _ in
                 if let last = state.chatMessages.last {
                     withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
+            .onChange(of: state.wizardSteps.isEmpty) { _, isEmpty in
+                if !isEmpty {
+                    withAnimation { proxy.scrollTo("procedure-card", anchor: .bottom) }
+                }
+            }
+            .onChange(of: state.youtubeVideos.isEmpty) { _, isEmpty in
+                if !isEmpty {
+                    withAnimation { proxy.scrollTo("youtube-card", anchor: .bottom) }
+                }
+            }
         }
     }
+
+    // MARK: - Thinking Indicator
 
     private var thinkingIndicator: some View {
         HStack(spacing: 8) {
@@ -120,9 +153,9 @@ struct SessionView: View {
         .glassCard(cornerRadius: 16)
     }
 
-    // MARK: - Procedure Card
+    // MARK: - Inline Procedure Card
 
-    private var procedureCardButton: some View {
+    private var inlineProcedureCard: some View {
         Button {
             state.wizardOpen = true
         } label: {
@@ -135,17 +168,18 @@ struct SessionView: View {
                 )
                 .frame(width: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2))
-                .padding(.trailing, 12)
+                .padding(.trailing, 10)
 
                 Image(systemName: "list.number")
-                    .font(.title3)
+                    .font(.subheadline)
                     .foregroundColor(.clutchPrimary)
-                    .padding(.trailing, 10)
+                    .padding(.trailing, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(state.procedureTitle.isEmpty ? "View Steps" : state.procedureTitle)
+                    Text(state.procedureTitle.isEmpty ? "Steps Ready" : state.procedureTitle)
                         .font(.subheadline.bold())
                         .foregroundColor(.white)
+                        .lineLimit(1)
                     Text("\(state.wizardSteps.count) steps")
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.60))
@@ -153,13 +187,55 @@ struct SessionView: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.up")
-                    .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.50))
+                // "Tap to start" badge
+                Text("Tap to start")
+                    .font(.caption2.bold())
+                    .foregroundColor(.clutchPrimary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.clutchPrimary.opacity(0.15)))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .glassCard(cornerRadius: 14)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Inline YouTube Card
+
+    private var inlineYouTubeCard: some View {
+        Button {
+            state.showYouTube = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "play.rectangle.fill")
+                    .font(.title3)
+                    .foregroundColor(.clutchPrimary)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Related Videos")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                    let count = state.youtubeVideos.count
+                    Text("\(count) video\(count == 1 ? "" : "s")")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.60))
+                }
+
+                Spacer()
+
+                // "Tap to watch" badge
+                Text("Tap to watch")
+                    .font(.caption2.bold())
+                    .foregroundColor(.clutchPrimary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.clutchPrimary.opacity(0.15)))
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .glassCard(cornerRadius: 16)
+            .padding(.vertical, 10)
+            .glassCard(cornerRadius: 14)
         }
         .buttonStyle(.plain)
     }
@@ -167,19 +243,42 @@ struct SessionView: View {
     // MARK: - Bottom Toolbar
 
     private var bottomToolbar: some View {
-        HStack(spacing: 16) {
-            // Session status + waveform
-            HStack(spacing: 8) {
-                Image(systemName: state.sessionStatus.icon)
-                    .foregroundColor(state.sessionStatus.color)
-                    .font(.caption)
-                Text(state.sessionStatus.label)
-                    .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.80))
-
-                if state.sessionStatus == .listening || state.sessionStatus == .speaking {
-                    WaveformView()
+        HStack(spacing: 0) {
+            // Left: mic, camera, language
+            HStack(spacing: 12) {
+                // Mute mic
+                Button {
+                    micMuted.toggle()
+                    if micMuted { audioManager.stopCapture() } else { audioManager.startCapture() }
+                } label: {
+                    Image(systemName: micMuted ? "mic.slash.fill" : "mic.fill")
+                        .font(.system(size: 17))
+                        .foregroundColor(micMuted ? .red.opacity(0.85) : .white)
+                        .glassCircle(size: 44)
                 }
+                .buttonStyle(.plain)
+
+                // Camera toggle (visual state only — glasses-only app)
+                Button { cameraOff.toggle() } label: {
+                    Image(systemName: cameraOff ? "video.slash.fill" : "video.fill")
+                        .font(.system(size: 17))
+                        .foregroundColor(cameraOff ? .red.opacity(0.85) : .white)
+                        .glassCircle(size: 44)
+                }
+                .buttonStyle(.plain)
+
+                // Language cycle
+                Button { cycleLanguage() } label: {
+                    HStack(spacing: 3) {
+                        Image(systemName: "globe")
+                            .font(.system(size: 13))
+                        Text(state.selectedLanguage.flag)
+                            .font(.system(size: 14))
+                    }
+                    .foregroundColor(.white)
+                    .glassCircle(size: 44)
+                }
+                .buttonStyle(.plain)
             }
 
             Spacer()
@@ -204,6 +303,14 @@ struct SessionView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
         .background(.ultraThinMaterial)
+    }
+
+    // MARK: - Helpers
+
+    private func cycleLanguage() {
+        let all = AppLanguage.all
+        let current = all.firstIndex(where: { $0.id == state.selectedLanguage.id }) ?? 0
+        state.selectedLanguage = all[(current + 1) % all.count]
     }
 
     // MARK: - Session Lifecycle

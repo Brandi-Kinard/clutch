@@ -17,24 +17,49 @@ extension Color {
 
 struct CosmicGradientBackground: View {
     var dimmed: Bool = false
+    /// When true, a soft violet overlay breathes in/out (use during speaking)
+    var pulsing: Bool = false
     @State private var animate = false
 
     var body: some View {
-        LinearGradient(
-            stops: [
-                .init(color: .clutchDeepIndigo, location: animate ? 0.00 : 0.10),
-                .init(color: .clutchViolet, location: animate ? 0.48 : 0.58),
-                .init(color: .clutchNearWhite.opacity(dimmed ? 0.12 : 0.22), location: 1.00),
-            ],
-            startPoint: animate ? .topLeading : .topTrailing,
-            endPoint: animate ? .bottomTrailing : .bottomLeading
-        )
-        .ignoresSafeArea()
+        ZStack {
+            LinearGradient(
+                stops: [
+                    .init(color: .clutchDeepIndigo, location: animate ? 0.00 : 0.10),
+                    .init(color: .clutchViolet, location: animate ? 0.48 : 0.58),
+                    .init(color: .clutchNearWhite.opacity(dimmed ? 0.12 : 0.22), location: 1.00),
+                ],
+                startPoint: animate ? .topLeading : .topTrailing,
+                endPoint: animate ? .bottomTrailing : .bottomLeading
+            )
+            .ignoresSafeArea()
+
+            if pulsing {
+                PulsingOverlay()
+            }
+        }
         .onAppear {
             withAnimation(.easeInOut(duration: 9).repeatForever(autoreverses: true)) {
                 animate = true
             }
         }
+    }
+}
+
+// MARK: - Pulsing Overlay (shown during speaking)
+
+struct PulsingOverlay: View {
+    @State private var breathing = false
+
+    var body: some View {
+        Color.clutchViolet
+            .opacity(breathing ? 0.14 : 0.0)
+            .ignoresSafeArea()
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                    breathing = true
+                }
+            }
     }
 }
 
@@ -137,43 +162,5 @@ struct ThinkingDot: View {
                     pulsing = true
                 }
             }
-    }
-}
-
-// MARK: - Waveform Visualizer
-
-struct WaveformView: View {
-    let barCount = 7
-    @State private var phases: [Double] = Array(repeating: 0, count: 7)
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 3) {
-            ForEach(0..<barCount, id: \.self) { i in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.clutchPrimary.opacity(0.85))
-                    .frame(width: 3, height: barHeight(for: i))
-            }
-        }
-        .frame(height: 20)
-        .onAppear { startAnimation() }
-    }
-
-    private func barHeight(for index: Int) -> CGFloat {
-        let base = 6.0
-        let amplitude = 10.0
-        return base + amplitude * abs(sin(phases[index]))
-    }
-
-    private func startAnimation() {
-        for i in 0..<barCount {
-            let delay = Double(i) * 0.12
-            withAnimation(
-                .easeInOut(duration: 0.5 + Double(i) * 0.07)
-                .repeatForever(autoreverses: true)
-                .delay(delay)
-            ) {
-                phases[i] = Double.pi
-            }
-        }
     }
 }

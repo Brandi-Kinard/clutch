@@ -23,14 +23,12 @@ struct WizardSheet: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Header bar
             headerBar
 
             if !state.wizardSteps.isEmpty {
                 let step = state.wizardSteps[state.wizardCurrentStep]
                 let total = state.wizardSteps.count
 
-                // Progress bar
                 progressBar(pct: CGFloat(state.wizardCurrentStep + 1) / CGFloat(total))
                     .padding(.bottom, 4)
 
@@ -38,7 +36,6 @@ struct WizardSheet: View {
                     VStack(alignment: .leading, spacing: 20) {
                         // Step badge
                         HStack(spacing: 12) {
-                            // Glass circle with violet border
                             ZStack {
                                 Circle()
                                     .fill(.ultraThinMaterial)
@@ -102,7 +99,6 @@ struct WizardSheet: View {
                     .padding(20)
                 }
 
-                // Navigation buttons
                 navButtons(total: total)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
@@ -115,10 +111,13 @@ struct WizardSheet: View {
 
     private var headerBar: some View {
         ZStack {
+            // Title with horizontal inset to avoid overlapping close button
             Text(state.procedureTitle.isEmpty ? "Steps" : state.procedureTitle)
                 .font(.headline)
                 .foregroundColor(.white)
                 .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.horizontal, 56) // reserve space for 32pt circle + margins
 
             HStack {
                 Spacer()
@@ -158,7 +157,7 @@ struct WizardSheet: View {
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Nav Buttons
+    // MARK: - Nav Buttons (Back / Next+Done, no Skip)
 
     private func navButtons(total: Int) -> some View {
         HStack {
@@ -176,19 +175,6 @@ struct WizardSheet: View {
             }
             .buttonStyle(.plain)
             .disabled(state.wizardCurrentStep == 0)
-
-            Spacer()
-
-            // Skip (subtle text)
-            Button { skip() } label: {
-                Text("Skip")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.50))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .glassCard(cornerRadius: 12)
-            }
-            .buttonStyle(.plain)
 
             Spacer()
 
@@ -226,9 +212,9 @@ struct WizardSheet: View {
                         .foregroundColor(.white.opacity(0.60))
                 }
 
-                // Emoji feedback row
+                // Feedback faces
                 HStack(spacing: 16) {
-                    ForEach(["👍", "❤️", "⭐", "🤩", "🎉"], id: \.self) { emoji in
+                    ForEach(["😡", "😔", "😐", "🙂", "😁"], id: \.self) { emoji in
                         Button {
                             closeAfterCompletion()
                         } label: {
@@ -266,8 +252,8 @@ struct WizardSheet: View {
     }
 
     private func closeAfterCompletion() {
+        // Videos are now shown inline in chat — no auto-open sheet
         state.wizardOpen = false
-        state.showYouTube = !state.youtubeVideos.isEmpty
     }
 
     private func notifyStepChange() {

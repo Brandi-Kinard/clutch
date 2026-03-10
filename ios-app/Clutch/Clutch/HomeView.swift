@@ -65,19 +65,6 @@ struct HomeView: View {
                     .glassButton()
                     .buttonStyle(.plain)
 
-                    Button {
-                        state.usePhoneCamera = true
-                        state.showSession = true
-                    } label: {
-                        Label("Use Phone Camera", systemImage: "camera.fill")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                    }
-                    .glassButton()
-                    .buttonStyle(.plain)
-
                     languageSelector
                         .padding(.top, 4)
                 }
