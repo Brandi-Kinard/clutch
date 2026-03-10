@@ -1,16 +1,41 @@
-"""Tool: generate reference images using Gemini native image generation."""
+"""Tool: generate reference images using Imagen 4 Fast."""
 
-import base64
+import asyncio
+import json
 import logging
 import os
-
-from google import genai
+import urllib.request
 
 logger = logging.getLogger("clutch.tools.search_images")
 
 
+def _call_imagen_api(prompt: str) -> str | None:
+    """Synchronous Imagen 4 Fast REST call. Returns a JPEG data URL or None."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return None
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"imagen-4.0-fast-generate-001:predict?key={api_key}"
+    )
+    payload = json.dumps({
+        "instances": [{"prompt": prompt}],
+        "parameters": {"sampleCount": 1},
+    }).encode()
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=45) as resp:
+        data = json.loads(resp.read())
+    b64 = data["predictions"][0]["bytesBase64Encoded"]
+    return f"data:image/jpeg;base64,{b64}"
+
+
 async def search_images(query: str, num_results: int = 1) -> list[dict]:
-    """Generate a reference image for a task step using Gemini image generation.
+    """Generate a reference image for a task step using Imagen 4 Fast.
 
     Args:
         query: Description of what to illustrate.
@@ -21,12 +46,9 @@ async def search_images(query: str, num_results: int = 1) -> list[dict]:
     """
     num_results = min(max(num_results, 1), 2)
 
-    api_key = os.environ.get("GOOGLE_API_KEY")
-    if not api_key:
+    if not os.environ.get("GOOGLE_API_KEY"):
         logger.error("GOOGLE_API_KEY not set")
         return []
-
-    client = genai.Client(api_key=api_key)
 
     prompt = (
         f"Generate a clear, helpful instructional reference image showing: {query}. "
@@ -37,33 +59,18 @@ async def search_images(query: str, num_results: int = 1) -> list[dict]:
     images = []
     for i in range(num_results):
         try:
-            logger.info("Generating image %d/%d for: %s", i + 1, num_results, query)
-            response = await client.aio.models.generate_content(
-                model="gemini-2.5-flash-image",
-                contents=[prompt],
-            )
-
-            if not response.candidates:
-                logger.warning("No candidates in response for '%s'", query)
-                continue
-
-            for part in response.candidates[0].content.parts:
-                if part.inline_data and part.inline_data.mime_type and part.inline_data.mime_type.startswith("image/"):
-                    raw = part.inline_data.data
-                    b64 = base64.b64encode(raw).decode()
-                    mime = part.inline_data.mime_type
-                    data_url = f"data:{mime};base64,{b64}"
-                    logger.info("Generated image: mime=%s, size=%d bytes", mime, len(raw))
-                    images.append({
-                        "title": f"AI-generated: {query}",
-                        "image_url": data_url,
-                        "thumbnail_url": data_url,
-                        "ai_generated": True,
-                    })
-                    break
-
+            logger.info("Generating Imagen 4 Fast image %d/%d for: %s", i + 1, num_results, query)
+            data_url = await asyncio.to_thread(_call_imagen_api, prompt)
+            if data_url:
+                logger.info("Generated image %d: ok", i + 1)
+                images.append({
+                    "title": f"AI-generated: {query}",
+                    "image_url": data_url,
+                    "thumbnail_url": data_url,
+                    "ai_generated": True,
+                })
         except Exception as e:
-            logger.warning("Image generation failed for '%s' (attempt %d): %s", query, i + 1, e)
+            logger.warning("Imagen 4 Fast failed for '%s' (attempt %d): %s", query, i + 1, e)
 
     logger.info("search_images returning %d images", len(images))
     return images

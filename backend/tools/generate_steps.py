@@ -5,6 +5,7 @@ import base64
 import json
 import logging
 import os
+import urllib.request
 
 from google import genai
 from google.genai import types
@@ -42,8 +43,33 @@ Task to generate steps for:
 """
 
 
-async def _generate_image_for_step(client: genai.Client, step: dict) -> str | None:
-    """Generate an image for a single step. Returns a base64 data URL or None."""
+def _call_imagen_api(prompt: str) -> str | None:
+    """Synchronous Imagen 4 Fast REST call. Wrapped in asyncio.to_thread for parallel use."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return None
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"imagen-4.0-fast-generate-001:predict?key={api_key}"
+    )
+    payload = json.dumps({
+        "instances": [{"prompt": prompt}],
+        "parameters": {"sampleCount": 1},
+    }).encode()
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=45) as resp:
+        data = json.loads(resp.read())
+    b64 = data["predictions"][0]["bytesBase64Encoded"]
+    return f"data:image/jpeg;base64,{b64}"
+
+
+async def _generate_image_for_step(step: dict) -> str | None:
+    """Generate an Imagen 4 Fast image for a single step. Returns a data URL or None."""
     query = step.get("image_search_query", "")
     if not query:
         return None
@@ -53,18 +79,10 @@ async def _generate_image_for_step(client: genai.Client, step: dict) -> str | No
         "understand this step. No text overlays. Simple and easy to understand."
     )
     try:
-        response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[prompt],
-        )
-        if not response.candidates:
-            return None
-        for part in response.candidates[0].content.parts:
-            if part.inline_data and part.inline_data.mime_type and part.inline_data.mime_type.startswith("image/"):
-                b64 = base64.b64encode(part.inline_data.data).decode()
-                return f"data:{part.inline_data.mime_type};base64,{b64}"
+        data_url = await asyncio.to_thread(_call_imagen_api, prompt)
+        return data_url
     except Exception as e:
-        logger.warning("Image generation failed for step %s (%r): %s", step.get("number"), query, e)
+        logger.warning("Imagen 4 Fast failed for step %s (%r): %s", step.get("number"), query, e)
     return None
 
 
@@ -98,11 +116,11 @@ async def generate_steps(task_description: str) -> dict:
 
     steps = result.get("steps", [])
 
-    # Generate images in parallel for the first MAX_IMAGES steps
+    # Generate images in parallel for the first MAX_IMAGES steps via Imagen 4 Fast
     image_steps = steps[:MAX_IMAGES]
     if image_steps:
-        logger.info("Generating images for %d steps in parallel", len(image_steps))
-        image_tasks = [_generate_image_for_step(client, step) for step in image_steps]
+        logger.info("Generating Imagen 4 Fast images for %d steps in parallel", len(image_steps))
+        image_tasks = [_generate_image_for_step(step) for step in image_steps]
         image_results = await asyncio.gather(*image_tasks)
         for step, data_url in zip(image_steps, image_results):
             step["image_data_url"] = data_url
