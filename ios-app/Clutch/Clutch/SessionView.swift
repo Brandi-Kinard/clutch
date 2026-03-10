@@ -172,7 +172,7 @@ struct SessionView: View {
 
                 Image(systemName: "list.number")
                     .font(.subheadline)
-                    .foregroundColor(.clutchPrimary)
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
                     .padding(.trailing, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -190,10 +190,10 @@ struct SessionView: View {
                 // "Tap to start" badge
                 Text("Tap to start")
                     .font(.caption2.bold())
-                    .foregroundColor(.clutchPrimary)
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Capsule().fill(Color.clutchPrimary.opacity(0.15)))
+                    .background(Capsule().fill(Color(red: 0.55, green: 0.35, blue: 0.95).opacity(0.25)))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -211,7 +211,7 @@ struct SessionView: View {
             HStack(spacing: 12) {
                 Image(systemName: "play.rectangle.fill")
                     .font(.title3)
-                    .foregroundColor(.clutchPrimary)
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Related Videos")
@@ -228,10 +228,10 @@ struct SessionView: View {
                 // "Tap to watch" badge
                 Text("Tap to watch")
                     .font(.caption2.bold())
-                    .foregroundColor(.clutchPrimary)
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Capsule().fill(Color.clutchPrimary.opacity(0.15)))
+                    .background(Capsule().fill(Color(red: 0.55, green: 0.35, blue: 0.95).opacity(0.25)))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
