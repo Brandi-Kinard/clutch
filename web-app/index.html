@@ -1111,6 +1111,47 @@ main {
 .feedback-thanks.show { opacity: 1; }
 
 
+/* ════ ANNOTATION CARD ════ */
+.chat-card.annotation-card {
+  background: transparent;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.annotation-card .annotation-img-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 300px;
+}
+.annotation-card .annotation-img-wrap img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(167,139,250,0.40);
+  cursor: pointer;
+  display: block;
+}
+.annotation-card .annotation-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 10px;
+  background: rgba(167,139,250,0.18);
+  border: 1px solid rgba(167,139,250,0.35);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.annotation-card .annotation-desc {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+}
+
+
 /* ════ LIGHTBOX ════ */
 .lightbox {
   display: none;
@@ -2148,6 +2189,10 @@ canvas.hidden-canvas { display: none; }
         hideThinking();
         if (!agentSpeaking && sessionActive) setStatus("listening");
         break;
+      case "annotation":
+        hideThinking();
+        addAnnotationCard(msg.image, msg.label, msg.description);
+        break;
       case "interrupted":
         stopAllPlayback(); hideThinking();
         if (sessionActive) setStatus("listening");
@@ -2169,6 +2214,34 @@ canvas.hidden-canvas { display: none; }
       c.innerHTML = '<div class="bubble-text">' + escapeHtml(clean) + '</div>';
       chatArea.insertBefore(c, thinkingCard); scrollChat();
     }
+  }
+
+  function addAnnotationCard(imageDataUrl, label, description) {
+    hideEmptyState();
+    var c = document.createElement("div");
+    c.className = "chat-card annotation-card";
+    var labelHtml = label
+      ? '<div class="annotation-label">' +
+          '<span class="material-symbols-outlined" style="font-size:14px">location_on</span>' +
+          escapeHtml(label) +
+        '</div>'
+      : "";
+    var descHtml = description
+      ? '<div class="annotation-desc">' + escapeHtml(description) + '</div>'
+      : "";
+    c.innerHTML =
+      '<div class="annotation-img-wrap">' +
+        '<img src="' + escapeAttr(imageDataUrl) + '" alt="' + escapeAttr(label || "Annotated view") + '">' +
+      '</div>' +
+      labelHtml +
+      descHtml;
+    // Tap image to open lightbox
+    c.querySelector("img").addEventListener("click", function() {
+      lightboxImg.src = this.src;
+      lightbox.classList.add("open");
+    });
+    chatArea.insertBefore(c, thinkingCard);
+    scrollChat();
   }
 
   function handleToolResult(tool, result) {

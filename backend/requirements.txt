@@ -4,3 +4,4 @@ google-api-python-client>=2.100.0
 websockets>=13.0
 python-dotenv>=1.0.0
 uvicorn>=0.30.0
+Pillow>=10.0.0

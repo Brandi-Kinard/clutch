@@ -2,7 +2,7 @@
 
 from google.adk.agents import Agent
 
-from tools import advance_step, generate_steps, search_youtube
+from tools import advance_step, annotate_image, generate_steps, search_youtube
 
 
 SYSTEM_PROMPT = """\
@@ -32,6 +32,11 @@ TOOL RULES:
 - generate_steps already includes images for each step — do NOT call search_images.
 - Call advance_step when the user says they're ready for the next step, BEFORE \
 describing it.
+- Call annotate_image when the user asks you to point out, circle, highlight, \
+or identify something specific in their view (e.g. "show me the dipstick", \
+"where is the fuse box", "point to the oil cap"). Pass the thing to find as \
+`query`. The annotated image appears on screen automatically — just say \
+"I've highlighted it on your screen."
 - Tools display visual cards on the user's phone. Do NOT narrate tool results.
 - After calling tools, just say "Check your screen" — nothing more about the \
 tool output.
@@ -42,5 +47,5 @@ clutch_agent = Agent(
     name="clutch",
     description="Real-time hands-on assistant for physical tasks via live video and audio.",
     instruction=SYSTEM_PROMPT,
-    tools=[advance_step, generate_steps, search_youtube],
+    tools=[advance_step, annotate_image, generate_steps, search_youtube],
 )

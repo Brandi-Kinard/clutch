@@ -2,6 +2,7 @@
 
 import asyncio
 import base64
+import contextvars
 import json
 import logging
 import os
@@ -24,6 +25,7 @@ load_dotenv()
 sys.path.insert(0, os.path.dirname(__file__))
 
 from agent import clutch_agent
+from tools.annotate_image import clear_session, session_id_var, set_latest_frame
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("clutch.server")
@@ -83,6 +85,10 @@ async def handle_client(websocket):
 
     live_queue = LiveRequestQueue()
 
+    # Set the session_id contextvar before creating the event task so the
+    # annotate_image tool can look up the right frame via session_id_var.
+    session_id_var.set(session_id)
+
     run_config = RunConfig(
         response_modalities=[types.Modality.AUDIO],
         output_audio_transcription=types.AudioTranscriptionConfig(),
@@ -133,6 +139,7 @@ async def handle_client(websocket):
             elif msg_type == "video":
                 # Video frame: base64-encoded JPEG
                 frame_bytes = base64.b64decode(data["data"])
+                set_latest_frame(session_id, frame_bytes)
                 live_queue.send_realtime(
                     types.Blob(data=frame_bytes, mime_type="image/jpeg")
                 )
@@ -177,6 +184,7 @@ async def handle_client(websocket):
             await event_task
         except asyncio.CancelledError:
             pass
+        clear_session(session_id)
         logger.info("Session ended: user=%s session=%s", user_id, session_id)
 
 
@@ -223,9 +231,27 @@ def _event_to_message(event) -> dict | None:
     if function_responses:
         results = []
         has_advance_step = False
+        annotation_msg = None
         for resp in function_responses:
             if resp.name == "advance_step":
                 has_advance_step = True
+                continue
+            if resp.name == "annotate_image":
+                result = resp.response or {}
+                if hasattr(result, "model_dump"):
+                    result = result.model_dump()
+                if isinstance(result, dict) and "result" in result and len(result) == 1:
+                    result = result["result"]
+                if isinstance(result, dict) and result.get("action") == "annotate":
+                    annotation_msg = {
+                        "type": "annotation",
+                        "image": result["image"],
+                        "label": result.get("label", ""),
+                        "description": result.get("description", ""),
+                    }
+                else:
+                    msg_text = result.get("message", "") if isinstance(result, dict) else ""
+                    logger.info("annotate_image not_found: %s", msg_text)
                 continue
             if resp.response is not None:
                 # resp.response may be a dict, list, or a pydantic model
@@ -246,6 +272,9 @@ def _event_to_message(event) -> dict | None:
         if has_advance_step:
             logger.info("advance_step tool called — signaling frontend")
             msgs.append({"type": "advance_step"})
+        if annotation_msg:
+            logger.info("annotate_image annotation ready — sending to frontend")
+            msgs.append(annotation_msg)
         if results:
             logger.info("Tool results: %s", [r["tool"] for r in results])
             msgs.append({"type": "tool_result", "results": results})
