@@ -25,7 +25,8 @@ load_dotenv()
 sys.path.insert(0, os.path.dirname(__file__))
 
 from agent import clutch_agent
-from tools.annotate_image import clear_session, session_id_var, set_latest_frame
+from tools.annotate_image import clear_session, get_pending_annotation, session_id_var, set_latest_frame
+from tools.generate_steps import get_pending_steps
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("clutch.server")
@@ -232,26 +233,51 @@ def _event_to_message(event) -> dict | None:
         results = []
         has_advance_step = False
         annotation_msg = None
+        steps_msg = None
         for resp in function_responses:
             if resp.name == "advance_step":
                 has_advance_step = True
                 continue
             if resp.name == "annotate_image":
+                # Full annotation (with base64 image) was stored out-of-band by the tool
+                # to avoid exceeding the bidi stream size limit (1008 error).
+                # The lightweight summary in resp.response tells us whether it succeeded.
                 result = resp.response or {}
                 if hasattr(result, "model_dump"):
                     result = result.model_dump()
                 if isinstance(result, dict) and "result" in result and len(result) == 1:
                     result = result["result"]
-                if isinstance(result, dict) and result.get("action") == "annotate":
-                    annotation_msg = {
-                        "type": "annotation",
-                        "image": result["image"],
-                        "label": result.get("label", ""),
-                        "description": result.get("description", ""),
-                    }
+                if isinstance(result, dict) and result.get("action") == "annotate_summary":
+                    session_id = session_id_var.get()
+                    full_annotation = get_pending_annotation(session_id) if session_id else None
+                    if full_annotation:
+                        annotation_msg = {
+                            "type": "annotation",
+                            "image": full_annotation["image"],
+                            "label": full_annotation.get("label", ""),
+                            "description": full_annotation.get("description", ""),
+                        }
+                        logger.info("annotate_image: forwarding annotation to frontend (bypassed bidi stream)")
+                    else:
+                        logger.warning("annotate_image: no pending annotation for session %s", session_id)
                 else:
                     msg_text = result.get("message", "") if isinstance(result, dict) else ""
                     logger.info("annotate_image not_found: %s", msg_text)
+                continue
+            if resp.name == "generate_steps":
+                # Full step data (with base64 images) was stored out-of-band by the
+                # tool to avoid exceeding the bidi stream size limit. Retrieve it
+                # here and ship it directly to the frontend WebSocket.
+                session_id = session_id_var.get()
+                full_data = get_pending_steps(session_id) if session_id else None
+                if full_data:
+                    steps_msg = {
+                        "type": "tool_result",
+                        "results": [{"tool": "generate_steps", "result": full_data}],
+                    }
+                    logger.info("generate_steps: forwarding %d steps to frontend (bypassed bidi stream)", len(full_data.get("steps", [])))
+                else:
+                    logger.warning("generate_steps: no pending steps found for session %s", session_id)
                 continue
             if resp.response is not None:
                 # resp.response may be a dict, list, or a pydantic model
@@ -275,6 +301,8 @@ def _event_to_message(event) -> dict | None:
         if annotation_msg:
             logger.info("annotate_image annotation ready — sending to frontend")
             msgs.append(annotation_msg)
+        if steps_msg:
+            msgs.append(steps_msg)
         if results:
             logger.info("Tool results: %s", [r["tool"] for r in results])
             msgs.append({"type": "tool_result", "results": results})

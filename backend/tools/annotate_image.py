@@ -21,6 +21,10 @@ session_id_var: ContextVar[str] = ContextVar("session_id", default="")
 # Module-level frame store: session_id -> latest JPEG bytes
 _latest_frames: dict[str, bytes] = {}
 
+# Stores full annotation result (with base64 image) out-of-band to avoid the
+# bidi stream size limit. server.py reads this to forward directly to the frontend.
+_pending_annotations: dict[str, dict] = {}
+
 
 def set_latest_frame(session_id: str, jpeg_bytes: bytes) -> None:
     """Called by server.py each time a video frame arrives."""
@@ -31,8 +35,14 @@ def get_latest_frame(session_id: str) -> bytes | None:
     return _latest_frames.get(session_id)
 
 
+def get_pending_annotation(session_id: str) -> dict | None:
+    """Pop and return the pending annotation for a session, or None."""
+    return _pending_annotations.pop(session_id, None)
+
+
 def clear_session(session_id: str) -> None:
     _latest_frames.pop(session_id, None)
+    _pending_annotations.pop(session_id, None)
 
 
 BBOX_PROMPT = """\
@@ -177,10 +187,24 @@ async def annotate_image(query: str) -> dict:
         annotated = jpeg_bytes  # fall back to unannotated frame
 
     b64 = base64.b64encode(annotated).decode()
-    logger.info("annotate_image: '%s' found, returning annotated JPEG", query)
+
+    # Store full result (with base64 image) for server.py to forward to the frontend.
+    # Returning it here would send it back through the bidi stream and trigger a 1008
+    # size error — same problem as generate_steps had with Imagen images.
+    if session_id:
+        _pending_annotations[session_id] = {
+            "action": "annotate",
+            "image": f"data:image/jpeg;base64,{b64}",
+            "label": label,
+            "description": description,
+        }
+        logger.info("annotate_image: '%s' found, stored annotation out-of-band for session %s", query, session_id)
+    else:
+        logger.warning("annotate_image: no session_id in context, annotation will not reach frontend")
+
     return {
-        "action": "annotate",
-        "image": f"data:image/jpeg;base64,{b64}",
+        "action": "annotate_summary",
+        "found": True,
         "label": label,
-        "description": description,
+        "summary": f"Found and highlighted the {label}",
     }

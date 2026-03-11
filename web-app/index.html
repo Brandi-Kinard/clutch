@@ -1693,6 +1693,17 @@ canvas.hidden-canvas { display: none; }
     ct.textContent = text;
     if (partial) { ct.style.display = "none"; }
     else {
+      var filtered = filterAgentText(text);
+      if (!filtered) {
+        // Drop internal-process leak — remove the card from chat entirely
+        if (currentAgentTranscriptCard && currentAgentTranscriptCard.parentNode) {
+          currentAgentTranscriptCard.parentNode.removeChild(currentAgentTranscriptCard);
+        }
+        currentAgentTranscriptCard = null;
+        scrollChat();
+        return;
+      }
+      ct.textContent = filtered;
       stopSpectrumAnim();
       var v = currentAgentTranscriptCard.querySelector(".spectrum-viz"); if (v) v.remove();
       ct.style.display = ""; ct.classList.add("fade-in");
@@ -1793,6 +1804,10 @@ canvas.hidden-canvas { display: none; }
     wizardOpen = false;
     sheetOverlay.classList.remove("open");
     bottomSheet.classList.remove("open");
+    // Clear any inline transform left by the swipe-to-dismiss handler;
+    // without this, re-opening via the procedure card is blocked by the stale value.
+    bottomSheet.style.transform = "";
+    bottomSheet.style.transition = "";
   }
   sheetOverlay.addEventListener("click", closeWizard);
   sheetCloseBtn.addEventListener("click", closeWizard);
@@ -2200,20 +2215,38 @@ canvas.hidden-canvas { display: none; }
     }
   }
 
+  // Filter and clean agent text. Returns cleaned string or null (drop it).
+  var AGENT_BLOCKED_PHRASES = [
+    "generating instructions", "confirming ready state", "advancing the process",
+    "initiating", "i've initiated", "i plan to generate", "i'm prepared to commence",
+    "generate_steps", "search_youtube", "advance_step", "annotate_image"
+  ];
+  function filterAgentText(text) {
+    if (!text) return null;
+    if (text.indexOf('`') !== -1) return null;
+    if (/^\s*\*\*/.test(text)) return null;
+    var lower = text.toLowerCase();
+    for (var i = 0; i < AGENT_BLOCKED_PHRASES.length; i++) {
+      if (lower.indexOf(AGENT_BLOCKED_PHRASES[i]) !== -1) return null;
+    }
+    var clean = text.replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "").trim();
+    return clean || null;
+  }
+
   function addAgentTextCard(text) {
     hideEmptyState();
     var clean = text.replace(/```json\s*[\s\S]*?```/g, "").trim();
-    if (clean) {
-      var c = document.createElement("div");
-      var lower = clean.toLowerCase();
-      if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("hold on") !== -1) {
-        c.className = "chat-card safety-warning";
-      } else {
-        c.className = "chat-card agent-msg";
-      }
-      c.innerHTML = '<div class="bubble-text">' + escapeHtml(clean) + '</div>';
-      chatArea.insertBefore(c, thinkingCard); scrollChat();
+    clean = filterAgentText(clean);
+    if (!clean) return;
+    var c = document.createElement("div");
+    var lower = clean.toLowerCase();
+    if (lower.indexOf("warning") !== -1 || lower.indexOf("danger") !== -1 || lower.indexOf("hold on") !== -1) {
+      c.className = "chat-card safety-warning";
+    } else {
+      c.className = "chat-card agent-msg";
     }
+    c.innerHTML = '<div class="bubble-text">' + escapeHtml(clean) + '</div>';
+    chatArea.insertBefore(c, thinkingCard); scrollChat();
   }
 
   function addAnnotationCard(imageDataUrl, label, description) {
@@ -2267,12 +2300,16 @@ canvas.hidden-canvas { display: none; }
       addProcedureCard(wizardTask, result.steps.length);
     }
 
-    if (tool === "search_youtube" && result && Array.isArray(result)) {
-      youtubeResults = result.filter(function(v) { return v.video_url && !v.error; });
-      console.log("YouTube: raw=" + result.length + " filtered=" + youtubeResults.length, youtubeResults);
-      addVideoArtifactCard();
-    } else if (tool === "search_youtube") {
-      console.warn("search_youtube returned unexpected result:", result);
+    if (tool === "search_youtube") {
+      // Unwrap ADK dict-wrapping if needed: {result: [...]} → [...]
+      var videos = (result && !Array.isArray(result) && Array.isArray(result.result)) ? result.result : result;
+      if (videos && Array.isArray(videos)) {
+        youtubeResults = videos.filter(function(v) { return v.video_url && !v.error; });
+        console.log("YouTube: raw=" + videos.length + " filtered=" + youtubeResults.length, youtubeResults);
+        addVideoArtifactCard();
+      } else {
+        console.warn("search_youtube returned unexpected result:", result);
+      }
     }
 
     if (tool === "search_images" && result && Array.isArray(result) && result.length > 0) {

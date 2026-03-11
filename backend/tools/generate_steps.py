@@ -10,7 +10,19 @@ import urllib.request
 from google import genai
 from google.genai import types
 
+from .annotate_image import session_id_var
+
 logger = logging.getLogger("clutch.tools.generate_steps")
+
+# Stores full step data (with base64 images) keyed by session_id.
+# The tool returns only a tiny summary to the bidi stream; server.py reads this
+# dict to send the full payload directly to the frontend WebSocket.
+_pending_steps: dict[str, dict] = {}
+
+
+def get_pending_steps(session_id: str) -> dict | None:
+    """Pop and return the pending steps for a session, or None."""
+    return _pending_steps.pop(session_id, None)
 
 MAX_IMAGES = 4  # cap parallel image generation to keep latency reasonable
 
@@ -93,8 +105,9 @@ async def generate_steps(task_description: str) -> dict:
         task_description: A description of the task the user needs help with.
 
     Returns:
-        dict with a list of steps, each containing number, instruction,
-        tools_needed, image_search_query, and image_data_url.
+        A lightweight dict with step count and summary. The full step data
+        (including base64 images) is stored in _pending_steps and sent directly
+        to the frontend by server.py, bypassing the bidi stream size limit.
     """
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
     response = await client.aio.models.generate_content(
@@ -130,4 +143,18 @@ async def generate_steps(task_description: str) -> dict:
     for step in steps[MAX_IMAGES:]:
         step["image_data_url"] = None
 
-    return result
+    # Store full data (with base64 images) for server.py to forward to the
+    # frontend WebSocket directly — do NOT return it here or it will be sent
+    # back through the bidi stream and trigger a 1007 size error.
+    session_id = session_id_var.get()
+    if session_id:
+        _pending_steps[session_id] = result
+        logger.info("Stored %d steps for session %s (bypassing bidi stream)", len(steps), session_id)
+    else:
+        logger.warning("generate_steps: no session_id in context, steps will not reach frontend")
+
+    return {
+        "action": "steps",
+        "step_count": len(steps),
+        "summary": f"Generated {len(steps)} steps for: {task_description}",
+    }
