@@ -157,6 +157,7 @@ struct SessionView: View {
 
     private var inlineProcedureCard: some View {
         Button {
+            state.wizardCurrentStep = 0   // always start from step 1 when re-opening
             state.wizardOpen = true
         } label: {
             HStack(spacing: 0) {
@@ -402,13 +403,29 @@ struct ChatBubble: View {
     }
 
     private var agentBubble: some View {
-        Text(message.text)
-            .font(.subheadline)
-            .foregroundColor(.white)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .glassCard(cornerRadius: 16)
-            .frame(maxWidth: 280, alignment: .leading)
+        VStack(alignment: .leading, spacing: 8) {
+            // Annotation image (if this is a highlight result)
+            if let dataURL = message.imageDataURL,
+               let uiImage = Data.fromDataURL(dataURL) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.clutchPrimary.opacity(0.45), lineWidth: 1)
+                    )
+            }
+            if !message.text.isEmpty {
+                Text(message.text)
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .glassCard(cornerRadius: 16)
+        .frame(maxWidth: 280, alignment: .leading)
     }
 
     private var userBubble: some View {

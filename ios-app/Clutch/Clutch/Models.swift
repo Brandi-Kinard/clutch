@@ -88,6 +88,7 @@ struct ChatMessage: Identifiable {
     let id = UUID()
     let text: String
     let isUser: Bool
+    var imageDataURL: String? = nil
 }
 
 struct YouTubeVideo: Identifiable {

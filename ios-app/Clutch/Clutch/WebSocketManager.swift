@@ -127,11 +127,9 @@ final class WebSocketManager {
                 }
 
             case "text":
-                if let text = json["text"] as? String {
-                    let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !clean.isEmpty {
-                        appState?.chatMessages.append(ChatMessage(text: clean, isUser: false))
-                    }
+                if let text = json["text"] as? String,
+                   let clean = filterAgentText(text) {
+                    appState?.chatMessages.append(ChatMessage(text: clean, isUser: false))
                 }
 
             case "input_transcription":
@@ -145,9 +143,19 @@ final class WebSocketManager {
             case "output_transcription":
                 if let text = json["text"] as? String, !text.isEmpty {
                     let partial = json["partial"] as? Bool ?? true
-                    if !partial {
-                        appState?.chatMessages.append(ChatMessage(text: text, isUser: false))
+                    if !partial, let clean = filterAgentText(text) {
+                        appState?.chatMessages.append(ChatMessage(text: clean, isUser: false))
                     }
+                }
+
+            case "annotation":
+                if let imageURL = json["image"] as? String {
+                    let label = json["label"] as? String ?? ""
+                    appState?.chatMessages.append(ChatMessage(
+                        text: label.isEmpty ? "Highlighted" : label,
+                        isUser: false,
+                        imageDataURL: imageURL
+                    ))
                 }
 
             case "tool_result":
@@ -238,5 +246,32 @@ final class WebSocketManager {
               let data = try? JSONSerialization.data(withJSONObject: dict),
               let str = String(data: data, encoding: .utf8) else { return }
         wsTask.send(.string(str)) { _ in }
+    }
+
+    // MARK: - Text filter
+
+    /// Returns cleaned text or nil if the text should be dropped (internal-process leak).
+    private func filterAgentText(_ text: String) -> String? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        // Drop markdown bold headers
+        if trimmed.hasPrefix("**") { return nil }
+        // Drop if contains backticks
+        if trimmed.contains("`") { return nil }
+        // Drop if contains internal-process phrases or tool names
+        let lower = trimmed.lowercased()
+        let blocked = [
+            "generating instructions", "confirming ready state", "advancing the process",
+            "initiating", "i've initiated", "i plan to generate", "i'm prepared to commence",
+            "generate_steps", "search_youtube", "advance_step", "annotate_image"
+        ]
+        for phrase in blocked where lower.contains(phrase) { return nil }
+        // Strip markdown formatting
+        let clean = trimmed
+            .replacingOccurrences(of: "**", with: "")
+            .replacingOccurrences(of: "*", with: "")
+            .replacingOccurrences(of: "`", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return clean.isEmpty ? nil : clean
     }
 }

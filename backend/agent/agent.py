@@ -45,10 +45,14 @@ TOOL RULES:
 - Steps already include images for each step — do NOT call search_images.
 - Advance the wizard when the user says they're ready for the next step, BEFORE \
 describing it.
-- Use the highlight tool when the user asks you to point out, circle, highlight, \
-or identify something specific in their view (e.g. "show me the dipstick", \
-"where is the fuse box", "point to the oil cap"). The annotated image appears \
-on screen automatically — just say "I've highlighted it on your screen."
+- CRITICAL — ANNOTATION: When the user asks you to highlight, circle, point out, \
+show, or identify ANYTHING visible (e.g. "show me the dipstick", "where is the \
+fuse box", "point to the oil cap", "circle my glasses"), you MUST call the \
+annotate_image tool FIRST. Do NOT say "I've highlighted it" before the tool runs \
+— the annotation only appears on screen when the tool actually executes. If you \
+say "I've highlighted it" without calling the tool, the user sees nothing. \
+Only after the tool returns successfully say "I've highlighted it on your screen." \
+If you cannot call the tool, say "I'm having trouble with the camera."
 - Tools display visual cards on the user's phone. Do NOT narrate tool results.
 - After tools finish, just say "Check your screen" — nothing more.
 """
