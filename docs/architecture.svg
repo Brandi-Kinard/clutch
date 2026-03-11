@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="Google Sans, Segoe UI, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="violetGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="100%" stop-color="#669DF6"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34A853"/>
+      <stop offset="100%" stop-color="#5BB974"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EA4335"/>
+      <stop offset="100%" stop-color="#F29900"/>
+    </linearGradient>
+    <linearGradient id="metaGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0668E1"/>
+      <stop offset="100%" stop-color="#00C2FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="600" y="42" text-anchor="middle" fill="#a78bfa" font-size="22" font-weight="700" letter-spacing="2">CLUTCH — SYSTEM ARCHITECTURE</text>
+  <text x="600" y="62" text-anchor="middle" fill="#8b8ba0" font-size="11">Gemini Live Agent Challenge · Live Agents Track</text>
+
+  <!-- ═══ USER DEVICES SECTION ═══ -->
+  <rect x="30" y="80" width="500" height="260" rx="16" fill="#1e1e30" stroke="#a78bfa" stroke-width="1.5" opacity="0.9" filter="url(#shadow)"/>
+  <text x="50" y="106" fill="#a78bfa" font-size="12" font-weight="600" letter-spacing="1.5">USER DEVICES</text>
+
+  <!-- Ray-Ban Meta -->
+  <rect x="50" y="120" width="200" height="100" rx="12" fill="#16213e" stroke="url(#metaGrad)" stroke-width="1.5"/>
+  <text x="150" y="145" text-anchor="middle" fill="#00C2FF" font-size="13" font-weight="700">🕶️ Ray-Ban Meta</text>
+  <text x="150" y="163" text-anchor="middle" fill="#8b8ba0" font-size="10">Wayfarer Gen 2</text>
+  <text x="150" y="180" text-anchor="middle" fill="#c0c0d0" font-size="9">12MP Camera · 5-Mic Array</text>
+  <text x="150" y="195" text-anchor="middle" fill="#c0c0d0" font-size="9">BT Speakers · 720p/30fps</text>
+  <text x="150" y="210" text-anchor="middle" fill="#00C2FF" font-size="9">Meta DAT SDK v0.4</text>
+
+  <!-- Arrow: Glasses → iPhone -->
+  <line x1="250" y1="170" x2="300" y2="170" stroke="#00C2FF" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="275" y="160" text-anchor="middle" fill="#8b8ba0" font-size="8">BT</text>
+
+  <!-- iPhone App -->
+  <rect x="310" y="120" width="200" height="100" rx="12" fill="#16213e" stroke="url(#violetGrad)" stroke-width="1.5"/>
+  <text x="410" y="145" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700">📱 iOS App</text>
+  <text x="410" y="163" text-anchor="middle" fill="#8b8ba0" font-size="10">SwiftUI · iPhone 13 Pro</text>
+  <text x="410" y="180" text-anchor="middle" fill="#c0c0d0" font-size="9">Audio: 16kHz PCM Capture</text>
+  <text x="410" y="195" text-anchor="middle" fill="#c0c0d0" font-size="9">Wizard UI · Chat Bubbles</text>
+  <text x="410" y="210" text-anchor="middle" fill="#a78bfa" font-size="9">Liquid Glass Design</text>
+
+  <!-- Web App -->
+  <rect x="50" y="235" width="460" height="55" rx="12" fill="#16213e" stroke="#8b8ba0" stroke-width="1"/>
+  <text x="280" y="258" text-anchor="middle" fill="#c0c0d0" font-size="12" font-weight="600">🌐 Web App (Safari / Chrome)</text>
+  <text x="280" y="275" text-anchor="middle" fill="#8b8ba0" font-size="9">WebRTC Camera · Web Audio API · Responsive Dark UI · PDF Export</text>
+
+  <!-- Arrow: Devices → Cloud Run -->
+  <path d="M 530 200 Q 570 200 600 300" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="580" y="240" fill="#a78bfa" font-size="10" font-weight="600" transform="rotate(60 580 240)">WebSocket</text>
+  <text x="565" y="260" fill="#8b8ba0" font-size="8" transform="rotate(60 565 260)">wss://</text>
+
+  <!-- ═══ CLOUD RUN SECTION ═══ -->
+  <rect x="550" y="80" width="370" height="340" rx="16" fill="#1e1e30" stroke="url(#blueGrad)" stroke-width="1.5" opacity="0.9" filter="url(#shadow)"/>
+  <text x="570" y="106" fill="#4285F4" font-size="12" font-weight="600" letter-spacing="1.5">GOOGLE CLOUD RUN</text>
+  <text x="830" y="106" fill="#8b8ba0" font-size="9">us-central1 · session-affinity</text>
+
+  <!-- WebSocket Server -->
+  <rect x="575" y="120" width="320" height="65" rx="10" fill="#1a2744" stroke="#4285F4" stroke-width="1"/>
+  <text x="735" y="143" text-anchor="middle" fill="#669DF6" font-size="12" font-weight="700">WebSocket Server</text>
+  <text x="735" y="158" text-anchor="middle" fill="#8b8ba0" font-size="9">server.py · websockets lib · HTTP static serving</text>
+  <text x="735" y="173" text-anchor="middle" fill="#c0c0d0" font-size="9">Audio/Video routing · Language switching · Step change signals</text>
+
+  <!-- Arrow: WS Server → Agent -->
+  <line x1="735" y1="185" x2="735" y2="205" stroke="#4285F4" stroke-width="1.5"/>
+
+  <!-- ADK Agent -->
+  <rect x="575" y="205" width="320" height="90" rx="10" fill="#1a2744" stroke="url(#greenGrad)" stroke-width="1.5"/>
+  <text x="735" y="228" text-anchor="middle" fill="#34A853" font-size="13" font-weight="700">🤖 ADK Agent</text>
+  <text x="735" y="245" text-anchor="middle" fill="#8b8ba0" font-size="10">gemini-2.0-flash-exp · bidi-streaming AUDIO</text>
+  <text x="735" y="262" text-anchor="middle" fill="#c0c0d0" font-size="9">11-Rule System Prompt · Concise Voice · Language Compliance</text>
+
+  <!-- Tools -->
+  <rect x="600" y="270" width="95" height="20" rx="5" fill="#2d4a2d" stroke="#5BB974" stroke-width="0.8"/>
+  <text x="647" y="283" text-anchor="middle" fill="#5BB974" font-size="8" font-weight="600">generate_steps</text>
+  <rect x="705" y="270" width="90" height="20" rx="5" fill="#2d4a2d" stroke="#5BB974" stroke-width="0.8"/>
+  <text x="750" y="283" text-anchor="middle" fill="#5BB974" font-size="8" font-weight="600">search_youtube</text>
+  <rect x="805" y="270" width="80" height="20" rx="5" fill="#2d4a2d" stroke="#5BB974" stroke-width="0.8"/>
+  <text x="845" y="283" text-anchor="middle" fill="#5BB974" font-size="8" font-weight="600">advance_step</text>
+
+  <!-- Arrow: Agent → Gemini Live -->
+  <rect x="575" y="315" width="320" height="50" rx="10" fill="#1a2744" stroke="#FBBC04" stroke-width="1"/>
+  <text x="735" y="337" text-anchor="middle" fill="#FBBC04" font-size="11" font-weight="600">⚡ Gemini Live API</text>
+  <text x="735" y="353" text-anchor="middle" fill="#8b8ba0" font-size="9">bidiGenerateContent · Real-time audio + vision processing</text>
+
+  <!-- ═══ GOOGLE AI SERVICES ═══ -->
+  <rect x="30" y="440" width="890" height="140" rx="16" fill="#1e1e30" stroke="url(#orangeGrad)" stroke-width="1.5" opacity="0.9" filter="url(#shadow)"/>
+  <text x="50" y="468" fill="#EA4335" font-size="12" font-weight="600" letter-spacing="1.5">GOOGLE AI SERVICES</text>
+
+  <!-- Gemini 2.5 Flash -->
+  <rect x="50" y="485" width="200" height="75" rx="10" fill="#2a1a1a" stroke="#EA4335" stroke-width="1"/>
+  <text x="150" y="510" text-anchor="middle" fill="#EA4335" font-size="12" font-weight="700">Gemini 2.5 Flash</text>
+  <text x="150" y="527" text-anchor="middle" fill="#c0c0d0" font-size="9">Step Planning &amp; JSON</text>
+  <text x="150" y="542" text-anchor="middle" fill="#8b8ba0" font-size="9">Structured procedure generation</text>
+
+  <!-- Imagen 4 Fast -->
+  <rect x="280" y="485" width="200" height="75" rx="10" fill="#2a1a1a" stroke="#F29900" stroke-width="1"/>
+  <text x="380" y="510" text-anchor="middle" fill="#F29900" font-size="12" font-weight="700">Imagen 4 Fast</text>
+  <text x="380" y="527" text-anchor="middle" fill="#c0c0d0" font-size="9">Step Image Generation</text>
+  <text x="380" y="542" text-anchor="middle" fill="#8b8ba0" font-size="9">4 images in parallel ~2s</text>
+
+  <!-- YouTube Data API -->
+  <rect x="510" y="485" width="200" height="75" rx="10" fill="#2a1a1a" stroke="#FF0000" stroke-width="1"/>
+  <text x="610" y="510" text-anchor="middle" fill="#FF0000" font-size="12" font-weight="700">YouTube Data API v3</text>
+  <text x="610" y="527" text-anchor="middle" fill="#c0c0d0" font-size="9">Tutorial Search</text>
+  <text x="610" y="542" text-anchor="middle" fill="#8b8ba0" font-size="9">Relevant how-to videos</text>
+
+  <!-- Arrows from Agent to Services -->
+  <line x1="647" y1="295" x2="150" y2="485" stroke="#EA4335" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="735" y1="295" x2="380" y2="485" stroke="#F29900" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="790" y1="295" x2="610" y2="485" stroke="#FF0000" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- ═══ DATA FLOW SECTION ═══ -->
+  <rect x="30" y="610" width="890" height="170" rx="16" fill="#1e1e30" stroke="#8b8ba0" stroke-width="1" opacity="0.9" filter="url(#shadow)"/>
+  <text x="50" y="638" fill="#a78bfa" font-size="12" font-weight="600" letter-spacing="1.5">DATA FLOW</text>
+
+  <!-- Flow steps -->
+  <rect x="50" y="655" width="155" height="50" rx="8" fill="#2e1065" stroke="#a78bfa" stroke-width="1"/>
+  <text x="127" y="675" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="700">1. Audio In</text>
+  <text x="127" y="693" text-anchor="middle" fill="#c0c0d0" font-size="8">16kHz PCM → base64</text>
+
+  <text x="217" y="680" fill="#8b8ba0" font-size="14">→</text>
+
+  <rect x="230" y="655" width="155" height="50" rx="8" fill="#1a2744" stroke="#4285F4" stroke-width="1"/>
+  <text x="307" y="675" text-anchor="middle" fill="#669DF6" font-size="10" font-weight="700">2. Video In</text>
+  <text x="307" y="693" text-anchor="middle" fill="#c0c0d0" font-size="8">720p JPEG → base64</text>
+
+  <text x="397" y="680" fill="#8b8ba0" font-size="14">→</text>
+
+  <rect x="410" y="655" width="155" height="50" rx="8" fill="#1a3a1a" stroke="#34A853" stroke-width="1"/>
+  <text x="487" y="675" text-anchor="middle" fill="#5BB974" font-size="10" font-weight="700">3. Agent Process</text>
+  <text x="487" y="693" text-anchor="middle" fill="#c0c0d0" font-size="8">Gemini + Tools</text>
+
+  <text x="577" y="680" fill="#8b8ba0" font-size="14">→</text>
+
+  <rect x="590" y="655" width="155" height="50" rx="8" fill="#2a1a1a" stroke="#F29900" stroke-width="1"/>
+  <text x="667" y="675" text-anchor="middle" fill="#F29900" font-size="10" font-weight="700">4. Generate</text>
+  <text x="667" y="693" text-anchor="middle" fill="#c0c0d0" font-size="8">Steps + Images + Videos</text>
+
+  <text x="757" y="680" fill="#8b8ba0" font-size="14">→</text>
+
+  <rect x="770" y="655" width="135" height="50" rx="8" fill="#2e1065" stroke="#a78bfa" stroke-width="1"/>
+  <text x="837" y="675" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="700">5. Audio Out</text>
+  <text x="837" y="693" text-anchor="middle" fill="#c0c0d0" font-size="8">PCM → Speakers</text>
+
+  <!-- Languages -->
+  <rect x="50" y="720" width="855" height="40" rx="8" fill="#16213e" stroke="#8b8ba0" stroke-width="0.5"/>
+  <text x="475" y="745" text-anchor="middle" fill="#c0c0d0" font-size="10">🇺🇸 English  ·  🇪🇸 Spanish  ·  🇻🇳 Vietnamese  ·  🇫🇷 French  ·  🇨🇳 Mandarin — switch mid-conversation</text>
+
+  <!-- ═══ BONUS SECTION ═══ -->
+  <rect x="940" y="80" width="240" height="500" rx="16" fill="#1e1e30" stroke="#FBBC04" stroke-width="1" opacity="0.9" filter="url(#shadow)"/>
+  <text x="960" y="108" fill="#FBBC04" font-size="12" font-weight="600" letter-spacing="1.5">HACKATHON</text>
+
+  <text x="960" y="138" fill="#c0c0d0" font-size="10" font-weight="600">Track</text>
+  <text x="960" y="155" fill="#a78bfa" font-size="11">🎤 Live Agents</text>
+
+  <text x="960" y="185" fill="#c0c0d0" font-size="10" font-weight="600">Required Tech</text>
+  <text x="960" y="202" fill="#4285F4" font-size="9">✓ Gemini Live API</text>
+  <text x="960" y="217" fill="#4285F4" font-size="9">✓ Google ADK</text>
+  <text x="960" y="232" fill="#4285F4" font-size="9">✓ Cloud Run</text>
+  <text x="960" y="247" fill="#4285F4" font-size="9">✓ Imagen 4 Fast</text>
+  <text x="960" y="262" fill="#4285F4" font-size="9">✓ YouTube Data API</text>
+
+  <text x="960" y="292" fill="#c0c0d0" font-size="10" font-weight="600">Bonus Points</text>
+  <text x="960" y="309" fill="#5BB974" font-size="9">✓ CI/CD (cloudbuild.yaml)</text>
+  <text x="960" y="324" fill="#5BB974" font-size="9">✓ IaC (deploy.sh)</text>
+  <text x="960" y="339" fill="#5BB974" font-size="9">✓ GDG Membership</text>
+  <text x="960" y="354" fill="#FBBC04" font-size="9">☐ Blog Post (dev.to)</text>
+
+  <text x="960" y="384" fill="#c0c0d0" font-size="10" font-weight="600">Demo Scenarios</text>
+  <text x="960" y="401" fill="#c0c0d0" font-size="9">🚗 "Check my oil level"</text>
+  <text x="960" y="416" fill="#c0c0d0" font-size="9">🔪 "Dice this onion"</text>
+  <text x="960" y="431" fill="#c0c0d0" font-size="9">🛞 "Tire pressure light"</text>
+  <text x="960" y="446" fill="#c0c0d0" font-size="9">🇪🇸 Language switch demo</text>
+
+  <text x="960" y="476" fill="#c0c0d0" font-size="10" font-weight="600">Builder</text>
+  <text x="960" y="493" fill="#a78bfa" font-size="10">Brandi Kinard</text>
+  <text x="960" y="510" fill="#8b8ba0" font-size="8">github.com/Brandi-Kinard</text>
+  <text x="960" y="527" fill="#8b8ba0" font-size="8">GDG Charlotte Member</text>
+  <text x="960" y="550" fill="#FBBC04" font-size="9" font-weight="600">#GeminiLiveAgentChallenge</text>
+</svg>
