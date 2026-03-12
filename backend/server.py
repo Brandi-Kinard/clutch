@@ -280,6 +280,7 @@ def _event_to_message(event) -> dict | None:
                         "results": [{"tool": "generate_steps", "result": full_data}],
                     }
                     logger.info("generate_steps: forwarding %d steps to frontend (bypassed bidi stream)", len(full_data.get("steps", [])))
+
                 else:
                     logger.warning("generate_steps: no pending steps found for session %s", session_id)
                 continue
@@ -334,6 +335,17 @@ def _event_to_message(event) -> dict | None:
             msgs.append(annotation_msg)
         if steps_msg:
             msgs.append(steps_msg)
+            # Auto-trigger products for known task categories
+            from tools.search_products import search_products_sync
+            task_summary = ""
+            for r in steps_msg.get("results", []):
+                if r.get("tool") == "generate_steps":
+                    task_summary = r.get("result", {}).get("task", "") or ""
+            if task_summary:
+                auto_prods = search_products_sync(task_summary)
+                if auto_prods:
+                    msgs.append({"type": "products", "query": task_summary[:50], "products": auto_prods})
+                    logger.info("Auto-triggered %d product cards", len(auto_prods))
         if youtube_msg:
             msgs.append(youtube_msg)
         if products_msg:

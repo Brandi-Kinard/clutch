@@ -1047,13 +1047,12 @@ main {
 
 /* ════ PRODUCT CARDS (Google Shopping style) ════ */
 .product-list-card {
-  background: var(--surface-container);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow-2);
-  animation: slideUp 0.28s cubic-bezier(0.2,0,0,1);
-  max-width: 92%;
+  background: rgba(30,30,48,0.85);
+  border: 1px solid rgba(167,139,250,0.30);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  margin-bottom: 8px;
+  overflow: visible;
 }
 .product-list-header {
   display: flex;
@@ -1079,12 +1078,12 @@ a.product-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--outline);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 8px;
   text-decoration: none;
   color: inherit;
-  transition: background 0.14s;
-  -webkit-tap-highlight-color: transparent;
 }
 a.product-item:last-child { border-bottom: none; }
 a.product-item:active { background: var(--surface-variant); }
@@ -1098,12 +1097,13 @@ a.product-item:active { background: var(--surface-variant); }
 }
 .product-info { flex: 1; min-width: 0; }
 .product-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--on-surface);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
   margin-bottom: 2px;
 }
 .product-stars {
@@ -2348,6 +2348,7 @@ canvas.hidden-canvas { display: none; }
 
   // Filter and clean agent text. Returns cleaned string or null (drop it).
   var AGENT_BLOCKED_PHRASES = [
+    "<ctrl", "ctrl46",
     "generating instructions", "confirming ready state", "advancing the process",
     "initiating", "i've initiated", "i plan to generate", "i'm prepared to commence",
     "generate_steps", "search_youtube", "advance_step", "annotate_image"

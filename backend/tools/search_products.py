@@ -109,6 +109,18 @@ _KEYWORD_MAP = [
 ]
 
 
+def search_products_sync(text: str) -> list:
+    """Sync helper: returns matching products based on keywords in text, or empty list."""
+    lower = text.lower()
+    if any(w in lower for w in ["drywall", "spackle", "spackling", "wall mud", "patch", "putty", "joint compound"]):
+        return _DRYWALL_PRODUCTS
+    if any(w in lower for w in ["oil", "motor oil", "synthetic", "5w-30", "engine oil", "oil change", "dipstick"]):
+        return _OIL_PRODUCTS
+    if any(w in lower for w in ["glasses", "lens", "eyeglass", "cleaning solution", "lens cleaner"]):
+        return _GLASSES_PRODUCTS
+    return []
+
+
 async def search_products(query: str) -> dict:
     """Search for nearby products matching the user's query.
 
