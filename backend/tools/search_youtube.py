@@ -6,6 +6,16 @@ import re
 
 from googleapiclient.discovery import build
 
+from .annotate_image import session_id_var
+
+# Out-of-band store: avoids returning large payloads through the bidi stream
+# (which triggers 1008 errors). server.py reads these via get_pending_youtube().
+_pending_youtube: dict[str, list] = {}
+
+
+def get_pending_youtube(session_id: str) -> list | None:
+    return _pending_youtube.pop(session_id, None)
+
 
 def _search_youtube_sync(query: str, max_results: int) -> list[dict]:
     """Synchronous YouTube search — runs in a thread pool."""
@@ -51,7 +61,7 @@ def _search_youtube_sync(query: str, max_results: int) -> list[dict]:
     return videos
 
 
-async def search_youtube(query: str, max_results: int = 3) -> list[dict]:
+async def search_youtube(query: str, max_results: int = 3) -> dict:
     """Search YouTube for how-to videos related to the task.
 
     Args:
@@ -59,14 +69,25 @@ async def search_youtube(query: str, max_results: int = 3) -> list[dict]:
         max_results: Number of results to return (default 3, max 5).
 
     Returns:
-        List of dicts with title, channel, video_url, thumbnail, and duration.
+        Lightweight summary dict; full results are sent to the client out-of-band.
     """
     max_results = min(max(max_results, 1), 5)
 
     try:
-        return await asyncio.to_thread(_search_youtube_sync, query, max_results)
+        videos = await asyncio.to_thread(_search_youtube_sync, query, max_results)
     except Exception as e:
-        return [{"error": f"YouTube search failed: {str(e)}"}]
+        videos = [{"error": f"YouTube search failed: {str(e)}"}]
+
+    session_id = session_id_var.get(None)
+    if session_id:
+        _pending_youtube[session_id] = videos
+
+    count = len(videos)
+    return {
+        "action": "youtube",
+        "count": count,
+        "summary": f"Found {count} relevant video{'s' if count != 1 else ''}",
+    }
 
 
 def _parse_duration(iso_duration: str) -> str:

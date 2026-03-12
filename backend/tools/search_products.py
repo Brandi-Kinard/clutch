@@ -2,7 +2,16 @@
 
 import logging
 
+from .annotate_image import session_id_var
+
 logger = logging.getLogger("clutch.tools.search_products")
+
+# Out-of-band store: avoids returning large payloads through the bidi stream.
+_pending_products: dict[str, dict] = {}
+
+
+def get_pending_products(session_id: str) -> dict | None:
+    return _pending_products.pop(session_id, None)
 
 _DRYWALL_PRODUCTS = [
     {
@@ -123,4 +132,14 @@ async def search_products(query: str) -> dict:
         "search_products: query=%r → %d result(s)",
         query, len(products),
     )
-    return {"action": "products", "query": query, "products": products}
+
+    session_id = session_id_var.get(None)
+    if session_id:
+        _pending_products[session_id] = {"query": query, "products": products}
+
+    count = len(products)
+    return {
+        "action": "products_summary",
+        "count": count,
+        "summary": f"Found {count} product{'s' if count != 1 else ''} matching '{query}'",
+    }
