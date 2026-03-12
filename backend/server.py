@@ -234,6 +234,7 @@ def _event_to_message(event) -> dict | None:
         has_advance_step = False
         annotation_msg = None
         steps_msg = None
+        products_msg = None
         for resp in function_responses:
             if resp.name == "advance_step":
                 has_advance_step = True
@@ -279,6 +280,22 @@ def _event_to_message(event) -> dict | None:
                 else:
                     logger.warning("generate_steps: no pending steps found for session %s", session_id)
                 continue
+            if resp.name == "search_products":
+                result = resp.response or {}
+                if hasattr(result, "model_dump"):
+                    result = result.model_dump()
+                if isinstance(result, dict) and "result" in result and len(result) == 1:
+                    result = result["result"]
+                if isinstance(result, dict) and result.get("action") == "products":
+                    products_msg = {
+                        "type": "products",
+                        "query": result.get("query", ""),
+                        "products": result.get("products", []),
+                    }
+                    logger.info("search_products: forwarding %d products to frontend", len(result.get("products", [])))
+                else:
+                    logger.info("search_products: no products matched")
+                continue
             if resp.response is not None:
                 # resp.response may be a dict, list, or a pydantic model
                 result = resp.response
@@ -303,6 +320,8 @@ def _event_to_message(event) -> dict | None:
             msgs.append(annotation_msg)
         if steps_msg:
             msgs.append(steps_msg)
+        if products_msg:
+            msgs.append(products_msg)
         if results:
             logger.info("Tool results: %s", [r["tool"] for r in results])
             msgs.append({"type": "tool_result", "results": results})

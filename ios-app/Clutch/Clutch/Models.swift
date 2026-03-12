@@ -98,6 +98,18 @@ struct YouTubeVideo: Identifiable {
     let thumbnailURL: String?
 }
 
+struct ProductItem: Identifiable {
+    let id = UUID()
+    let name: String
+    let price: String
+    let store: String
+    let rating: Double
+    let reviews: Int
+    let distanceMi: Double?
+    let thumbnail: String
+    let url: String
+}
+
 struct AppLanguage: Identifiable {
     let id: String
     let name: String

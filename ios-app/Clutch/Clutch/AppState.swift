@@ -32,4 +32,8 @@ final class AppState {
     // MARK: YouTube
     var youtubeVideos: [YouTubeVideo] = []
     var showYouTube: Bool = false
+
+    // MARK: Products
+    var productItems: [ProductItem] = []
+    var showProducts: Bool = false
 }

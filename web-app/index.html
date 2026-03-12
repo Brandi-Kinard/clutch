@@ -1045,6 +1045,92 @@ main {
 }
 
 
+/* ════ PRODUCT CARDS (Google Shopping style) ════ */
+.product-list-card {
+  background: var(--surface-container);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-2);
+  animation: slideUp 0.28s cubic-bezier(0.2,0,0,1);
+  max-width: 92%;
+}
+.product-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px 10px;
+  border-bottom: 1px solid var(--outline);
+}
+.product-list-header .plh-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.product-list-header .plh-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary);
+  background: rgba(167,139,250,0.15);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+a.product-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--outline);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.14s;
+  -webkit-tap-highlight-color: transparent;
+}
+a.product-item:last-child { border-bottom: none; }
+a.product-item:active { background: var(--surface-variant); }
+.product-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--surface-variant);
+  flex-shrink: 0;
+}
+.product-info { flex: 1; min-width: 0; }
+.product-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.product-stars {
+  font-size: 12px;
+  color: #f9ab00;
+  margin-bottom: 2px;
+}
+.product-stars .rev-count {
+  color: var(--on-surface-variant);
+  font-size: 11px;
+}
+.product-store {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4caf50;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+
 /* ════ CONFETTI ════ */
 .confetti-container {
   position: fixed;
@@ -1789,6 +1875,47 @@ canvas.hidden-canvas { display: none; }
     scrollChat();
   }
 
+  // ==== Product Cards (Google Shopping style) ====
+  function renderStars(rating) {
+    var r = Math.round(rating * 2) / 2; // round to nearest 0.5
+    var out = "";
+    for (var i = 1; i <= 5; i++) {
+      out += i <= r ? "★" : "☆";
+    }
+    return out + " " + rating.toFixed(1);
+  }
+
+  function addProductCards(query, products) {
+    hideEmptyState();
+    if (!products || products.length === 0) return;
+    var c = document.createElement("div");
+    c.className = "product-list-card";
+    var html = '<div class="product-list-header">' +
+      '<span class="plh-title">🛒 Products nearby</span>' +
+      '<span class="plh-badge">Tap to shop</span>' +
+      '</div>';
+    products.forEach(function(p) {
+      var storeInfo = escapeHtml(p.store || "");
+      if (p.distance_mi) storeInfo += " · " + p.distance_mi + " mi away";
+      html +=
+        '<a class="product-item" href="' + escapeAttr(p.url || "#") + '" target="_blank" rel="noopener">' +
+          '<img class="product-thumb" src="' + escapeAttr(p.thumbnail || "") + '" alt="" ' +
+               'onerror="this.style.background=\'var(--surface-variant)\';this.style.opacity=\'0\'">' +
+          '<div class="product-info">' +
+            '<div class="product-name">' + escapeHtml(p.name || "") + '</div>' +
+            '<div class="product-stars">' + renderStars(p.rating || 0) +
+              ' <span class="rev-count">(' + ((p.reviews || 0).toLocaleString()) + ')</span>' +
+            '</div>' +
+            '<div class="product-store">' + storeInfo + '</div>' +
+          '</div>' +
+          '<div class="product-price">' + escapeHtml(p.price || "") + '</div>' +
+        '</a>';
+    });
+    c.innerHTML = html;
+    chatArea.insertBefore(c, thinkingCard);
+    scrollChat();
+  }
+
   // ==== Bottom Sheet Wizard ====
   function openWizard() {
     if (wizardSteps.length === 0) return;
@@ -2207,6 +2334,10 @@ canvas.hidden-canvas { display: none; }
       case "annotation":
         hideThinking();
         addAnnotationCard(msg.image, msg.label, msg.description);
+        break;
+      case "products":
+        hideThinking();
+        addProductCards(msg.query, msg.products);
         break;
       case "interrupted":
         stopAllPlayback(); hideThinking();

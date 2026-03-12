@@ -158,6 +158,26 @@ final class WebSocketManager {
                     ))
                 }
 
+            case "products":
+                if let arr = json["products"] as? [[String: Any]] {
+                    appState?.productItems = arr.compactMap { p in
+                        guard let name = p["name"] as? String,
+                              let price = p["price"] as? String,
+                              let store = p["store"] as? String,
+                              let url = p["url"] as? String else { return nil }
+                        return ProductItem(
+                            name: name,
+                            price: price,
+                            store: store,
+                            rating: p["rating"] as? Double ?? 0,
+                            reviews: p["reviews"] as? Int ?? 0,
+                            distanceMi: p["distance_mi"] as? Double,
+                            thumbnail: p["thumbnail"] as? String ?? "",
+                            url: url
+                        )
+                    }
+                }
+
             case "tool_result":
                 if let results = json["results"] as? [[String: Any]] {
                     for r in results {

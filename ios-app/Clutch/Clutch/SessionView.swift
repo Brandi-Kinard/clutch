@@ -41,6 +41,10 @@ struct SessionView: View {
             YouTubeSheet()
                 .environment(state)
         }
+        .sheet(isPresented: $state.showProducts) {
+            ProductsSheet()
+                .environment(state)
+        }
         .onAppear { startSession() }
         .onDisappear { endSession() }
     }
@@ -109,6 +113,13 @@ struct SessionView: View {
                             .padding(.horizontal, 16)
                             .id("youtube-card")
                     }
+
+                    // Inline Products card
+                    if !state.productItems.isEmpty {
+                        inlineProductsCard
+                            .padding(.horizontal, 16)
+                            .id("products-card")
+                    }
                 }
                 .padding(.vertical, 12)
             }
@@ -134,6 +145,11 @@ struct SessionView: View {
             .onChange(of: state.youtubeVideos.isEmpty) { _, isEmpty in
                 if !isEmpty {
                     withAnimation { proxy.scrollTo("youtube-card", anchor: .bottom) }
+                }
+            }
+            .onChange(of: state.productItems.isEmpty) { _, isEmpty in
+                if !isEmpty {
+                    withAnimation { proxy.scrollTo("products-card", anchor: .bottom) }
                 }
             }
         }
@@ -228,6 +244,43 @@ struct SessionView: View {
 
                 // "Tap to watch" badge
                 Text("Tap to watch")
+                    .font(.caption2.bold())
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color(red: 0.55, green: 0.35, blue: 0.95).opacity(0.25)))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .glassCard(cornerRadius: 14)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Inline Products Card
+
+    private var inlineProductsCard: some View {
+        Button {
+            state.showProducts = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "cart.fill")
+                    .font(.title3)
+                    .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Products Nearby")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                    let count = state.productItems.count
+                    Text("\(count) result\(count == 1 ? "" : "s") found")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.60))
+                }
+
+                Spacer()
+
+                Text("Tap to shop")
                     .font(.caption2.bold())
                     .foregroundColor(Color(red: 0.55, green: 0.35, blue: 0.95))
                     .padding(.horizontal, 8)

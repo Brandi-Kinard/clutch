@@ -2,7 +2,7 @@
 
 from google.adk.agents import Agent
 
-from tools import advance_step, annotate_image, generate_steps, search_youtube
+from tools import advance_step, annotate_image, generate_steps, search_products, search_youtube
 
 
 SYSTEM_PROMPT = """\
@@ -29,7 +29,7 @@ Confirm the switch in the new language, then continue ONLY in that language.
 
 NEVER REVEAL YOUR INTERNAL PROCESS — CRITICAL:
 - NEVER say tool names: "generate_steps", "search_youtube", "advance_step", \
-"annotate_image", or any function name.
+"annotate_image", "search_products", or any function name.
 - NEVER say "calling", "initiating", "I'm going to call", "running a tool", \
 "using a function", "making a request", or any similar phrase.
 - NEVER use backticks, asterisks, bullet points, markdown, or any formatting.
@@ -53,6 +53,10 @@ annotate_image tool FIRST. Do NOT say "I've highlighted it" before the tool runs
 say "I've highlighted it" without calling the tool, the user sees nothing. \
 Only after the tool returns successfully say "I've highlighted it on your screen." \
 If you cannot call the tool, say "I'm having trouble with the camera."
+- When the user asks where to buy something, what product to get, or needs \
+materials or supplies for a task (e.g. "where do I get wall mud?", "what kind of \
+oil do I need?", "where can I buy that?"), call search_products with what they need. \
+Say "I'm checking nearby stores" while it runs.
 - Tools display visual cards on the user's phone. Do NOT narrate tool results.
 - After tools finish, just say "Check your screen" — nothing more.
 """
@@ -62,5 +66,5 @@ clutch_agent = Agent(
     name="clutch",
     description="Real-time hands-on assistant for physical tasks via live video and audio.",
     instruction=SYSTEM_PROMPT,
-    tools=[advance_step, annotate_image, generate_steps, search_youtube],
+    tools=[advance_step, annotate_image, generate_steps, search_products, search_youtube],
 )
