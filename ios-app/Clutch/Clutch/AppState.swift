@@ -15,7 +15,7 @@ final class AppState {
 
     // MARK: Settings (persisted)
     var wsURL: String {
-        get { "wss://clutch-vyt2xlbryq-uc.a.run.app/ws" }
+        get { "wss://clutch-154259901703.us-central1.run.app/ws" }
         set { UserDefaults.standard.set(newValue, forKey: "wsURL") }
     }
 

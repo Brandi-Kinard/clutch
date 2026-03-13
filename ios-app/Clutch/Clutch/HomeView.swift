@@ -161,7 +161,7 @@ struct SettingsSheet: View {
                         .keyboardType(.URL)
                 }
                 Section {
-                    Text("Default: wss://clutch-vyt2xlbryq-uc.a.run.app")
+                    Text("Default: wss://clutch-154259901703.us-central1.run.app")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
