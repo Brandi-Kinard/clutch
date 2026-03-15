@@ -66,7 +66,7 @@ Put on your Ray-Ban Meta smart glasses (or point your phone camera), ask *"How d
 ## Architecture
 
 <p align="center">
-  <img src="docs/architecture.svg" alt="Clutch Architecture Diagram" width="100%">
+  <img src="docs/clutch_architecture_diagram.svg" alt="Clutch Architecture Diagram" width="100%">
 </p>
 
 ```
