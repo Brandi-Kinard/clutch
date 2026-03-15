@@ -62,7 +62,7 @@ Say "I'm checking nearby stores" while it runs.
 """
 
 clutch_agent = Agent(
-    model="gemini-2.5-flash-native-audio-latest",
+    model="gemini-2.5-flash-native-audio-preview-12-2025",
     name="clutch",
     description="Real-time hands-on assistant for physical tasks via live video and audio.",
     instruction=SYSTEM_PROMPT,
