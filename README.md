@@ -41,7 +41,7 @@ Put on your Ray-Ban Meta smart glasses (or point your phone camera), ask *"How d
 
 ## Demo Video
 
-[![Watch Clutch in action](https://img.youtube.com/vi/Dpyz_3On09U/maxresdefault.jpg)](https://youtu.be/Dpyz_3On09U?si=vOTeCw21EfrTwB-5)
+[![Watch Clutch in action](https://img.youtube.com/vi/Dpyz_3On09U/hqdefault.jpg)](https://youtu.be/Dpyz_3On09U?si=vOTeCw21EfrTwB-5)
 
 *4-minute demo: oil check guidance via Ray-Ban Meta smart glasses, real-time voice conversation, AI-generated step images, YouTube tutorial surfacing, and live language switching to Spanish.*
 
