@@ -41,10 +41,9 @@ Put on your Ray-Ban Meta smart glasses (or point your phone camera), ask *"How d
 
 ## Demo Video
 
-<!-- TODO: Replace with actual YouTube embed -->
-[![Clutch Demo](docs/demo-thumbnail.png)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
+[![Watch Clutch in action](https://img.youtube.com/vi/Dpyz_3On09U/maxresdefault.jpg)](https://youtu.be/Dpyz_3On09U?si=vOTeCw21EfrTwB-5)
 
-*4-minute demo showing: oil check guidance via smart glasses, kitchen knife techniques, and live language switching to Spanish.*
+*4-minute demo: oil check guidance via Ray-Ban Meta smart glasses, real-time voice conversation, AI-generated step images, YouTube tutorial surfacing, and live language switching to Spanish.*
 
 ---
 
@@ -68,56 +67,6 @@ Put on your Ray-Ban Meta smart glasses (or point your phone camera), ask *"How d
 <p align="center">
   <img src="docs/clutch_architecture_diagram.svg" alt="Clutch Architecture Diagram" width="100%">
 </p>
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        USER DEVICES                             │
-│                                                                 │
-│  ┌──────────────────┐     ┌──────────────────────────────────┐  │
-│  │ Ray-Ban Meta      │     │ iPhone Companion App             │  │
-│  │ Wayfarer Gen 2    │ BT  │ (SwiftUI + Meta DAT SDK v0.4)   │  │
-│  │ • 12MP Camera     ├────►│ • Audio capture/playback (16kHz) │  │
-│  │ • 5-mic array     │     │ • Camera frame streaming         │  │
-│  │ • BT speakers     │     │ • Wizard UI + Chat bubbles       │  │
-│  └──────────────────┘     └──────────┬───────────────────────┘  │
-│                                      │ WebSocket (wss://)       │
-│  ┌───────────────────────────────────┼───────────────────────┐  │
-│  │ Safari / Chrome Web App           │ (WebRTC fallback)     │  │
-│  │ • Responsive dark UI              │                       │  │
-│  │ • Camera preview + voice          │                       │  │
-│  └───────────────────────────────────┘                       │  │
-└──────────────────────────────────────┼───────────────────────┘──┘
-                                       │
-                    ┌──────────────────▼──────────────────┐
-                    │     GOOGLE CLOUD RUN                 │
-                    │     (us-central1, min-instances=1)   │
-                    │                                      │
-                    │  ┌────────────────────────────────┐  │
-                    │  │  Python WebSocket Server        │  │
-                    │  │  (server.py + websockets)       │  │
-                    │  └──────────┬─────────────────────┘  │
-                    │             │                         │
-                    │  ┌──────────▼─────────────────────┐  │
-                    │  │  ADK Agent (agent.py)           │  │
-                    │  │  Model: gemini-2.0-flash-exp    │  │
-                    │  │  Mode: bidi-streaming AUDIO     │  │
-                    │  │                                 │  │
-                    │  │  Tools:                         │  │
-                    │  │  ├── generate_steps             │  │
-                    │  │  ├── search_youtube             │  │
-                    │  │  └── advance_step               │  │
-                    │  └──────────┬─────────────────────┘  │
-                    └─────────────┼─────────────────────────┘
-                                  │
-              ┌───────────────────┼───────────────────────┐
-              │                   │                       │
-    ┌─────────▼──────┐  ┌────────▼───────┐  ┌───────────▼──────┐
-    │ Gemini 2.5      │  │ Imagen 4 Fast  │  │ YouTube Data     │
-    │ Flash           │  │ (image gen)    │  │ API v3           │
-    │ (step planning) │  │ 4 images in    │  │ (tutorial search)│
-    │                 │  │ parallel ~2s   │  │                  │
-    └─────────────────┘  └────────────────┘  └──────────────────┘
-```
 
 ### Data Flow
 
@@ -292,6 +241,7 @@ The app is deployed on Google Cloud Run with automated CI/CD:
 - **Track:** Live Agents
 - **Builder:** [Brandi Kinard](https://github.com/Brandi-Kinard)
 - **GDG Profile:** [gdg.community.dev/u/m2afcw](https://gdg.community.dev/u/m2afcw/#/about)
+- **Devpost:** [Clutch on Devpost](https://devpost.com/software/clutch-b0uyqz)
 
 *Created for the Gemini Live Agent Challenge hackathon. #GeminiLiveAgentChallenge*
 
