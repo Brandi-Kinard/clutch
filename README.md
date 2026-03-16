@@ -2,7 +2,7 @@
   <img src="docs/clutch-banner.svg" alt="Clutch Banner" width="100%">
 </p>
 
-<h1 align="center">🔧 Clutch</h1>
+<h1 align="center">🛟 Clutch</h1>
 
 <p align="center">
   <strong>The only tool in your box that tells you what to do next.</strong>
