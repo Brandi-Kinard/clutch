@@ -47,6 +47,24 @@ Put on your Ray-Ban Meta smart glasses (or point your phone camera), ask *"How d
 
 ---
 
+---
+
+## See It In Action
+
+<p align="center"><strong>It sees what you see.</strong></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Brandi-Kinard/clutch/main/docs/annotation.gif" width="320"></p>
+
+<p align="center"><strong>Stuck? Here's what's next.</strong></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Brandi-Kinard/clutch/main/docs/wizard-steps.gif" width="320"></p>
+
+<p align="center"><strong>Switch languages. Mid-sentence.</strong></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Brandi-Kinard/clutch/main/docs/language-switch.gif" width="320"></p>
+
+<p align="center"><strong>Watch it done right.</strong></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Brandi-Kinard/clutch/main/docs/youtube.gif" width="320"></p>
+
+---
+
 ## Key Features
 
 | Feature | Description |
