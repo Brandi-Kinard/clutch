@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400">
+  <defs>
+    <!-- Background gradient: deep indigo left to near-black right -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+
+    <!-- Radial glow behind main text -->
+    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3a4adf" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Google-four-color accent line gradient -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#4285F4"/>
+      <stop offset="33%"  stop-color="#FBBC04"/>
+      <stop offset="67%"  stop-color="#EA4335"/>
+      <stop offset="100%" stop-color="#34A853"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1280" height="400" fill="#0a0a0f"/>
+
+  <!-- Gradient overlay -->
+  <rect width="1280" height="400" fill="url(#bgGradient)"/>
+
+  <!-- Radial glow centered on text area -->
+  <ellipse cx="640" cy="185" rx="480" ry="220" fill="url(#glowGradient)"/>
+
+  <!-- Google-color accent line, 200px centered, above tagline -->
+  <rect x="540" y="258" width="200" height="3" rx="1.5" fill="url(#accentGradient)"/>
+
+  <!-- Main title -->
+  <text
+    x="640"
+    y="220"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="#ffffff"
+    letter-spacing="-1"
+  >🔧 Clutch</text>
+
+  <!-- Tagline -->
+  <text
+    x="640"
+    y="312"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="24"
+    font-weight="400"
+    fill="#a0a0b0"
+    letter-spacing="0.3"
+  >The only tool in your box that tells you what to do next.</text>
+</svg>

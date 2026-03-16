@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/clutch-banner.png" alt="Clutch Banner" width="100%">
+  <img src="docs/clutch-banner.svg" alt="Clutch Banner" width="100%">
 </p>
 
 <h1 align="center">🔧 Clutch</h1>
